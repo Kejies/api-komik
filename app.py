@@ -6,12 +6,6 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 app.register_blueprint(api_routes)
 
-@app.route('/')
-def main():
-    return render_template('index.html')
-@app.route('/api')
-def api_docs():
-    return render_template('index.html')
 
 if __name__ == "__main__":
     app.run(debug=True)
