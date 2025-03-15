@@ -1,7 +1,6 @@
-from flask import Blueprint, Response
+from flask import Blueprint, jsonify
 import json
 import logging
-from collections import OrderedDict
 from scraper import terbaru, popular
 
 api_routes = Blueprint("api_routes", __name__)
@@ -10,17 +9,15 @@ api_routes = Blueprint("api_routes", __name__)
 def api_terbaru(page):
     komik_data, total_pages = terbaru(page)
 
-    data = OrderedDict([
-        ("success", True),
-        ("message", "Berhasil mengambil data"),
-        ("data", {
-            "current_page": str(page),
-            "total_page": str(total_pages),
-            "data": komik_data
-        })
-    ])
+    data = {
+    "success": True,
+    "message": "Berhasil mengambil data",
+    "current_page": str(page),
+    "total_page": str(total_pages),
+    "data": komik_data 
+}
     
-    return Response(json.dumps(data, indent=4), mimetype="application/json")
+    return jsonify(data)
 
 @api_routes.route('/api/popular/', methods=['GET'])
 def api_popular():
@@ -28,12 +25,10 @@ def api_popular():
 
     logging.debug(f"DEBUG: Data Popular di Vercel -> {komik_data}")
 
-    data = OrderedDict([
-        ("success", True),
-        ("message", "Berhasil mengambil data"),
-        ("data", {
-            "data": komik_data
-        })
-    ])
+    data = {
+        "success": True,
+        "message": "Berhasil mengambil data",
+        "data": komik_data
+    }
     
-    return Response(json.dumps(data, indent=4), mimetype="application/json")
+    return jsonify(data)
