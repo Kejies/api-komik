@@ -16,7 +16,7 @@ def api_terbaru(page):
         "data": komik_data
     }
     
-    return jsonify(data)  # Flask otomatis mengatur Content-Type: application/json
+    return jsonify(data) 
 
 @api_routes.route('/api/popular/', methods=['GET'])
 def api_popular():
@@ -39,7 +39,7 @@ def api_content(link):
             "success": False,
             "message": "Gagal mengambil data. Pastikan link benar atau coba lagi nanti.",
             "data": None
-        }), 404  # Tambahkan status 404 jika gagal
+        }), 404
 
     return jsonify({
         "success": True,
