@@ -142,37 +142,35 @@ def detail(link):
 
 def content(link):
     try:
-        base_url = f"https://komikindo2.com/{link}"        
-        res = requests.get(base_url)
+        base_url = f"https://komikindo2.com/{link}"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+        }
+        res = requests.get(base_url, headers=headers)
+
         if res.status_code != 200:
-            print(f"Error: Status Code {res.status_code}")
-            return None
+            return {"success": False, "message": f"Gagal mengambil data dari {base_url}, Status Code: {res.status_code}"}
 
         soup = BeautifulSoup(res.content, "html.parser")
         main = soup.find("div", class_="chapter-area")
+
         if not main:
-            print("Error: Tidak menemukan 'chapter-area'")
-            return None
+            return {"success": False, "message": "Halaman tidak ditemukan atau struktur berubah"}
 
-        title_elem = main.find("h1", class_="entry-title")
-        title = title_elem.text.strip() if title_elem else "Tidak Diketahui"
+        title = main.find("h1", class_="entry-title").text.strip()
 
-        prev_link = main.find("a", rel="prev")
-        prev_chap = urlparse(prev_link["href"]).path.strip("/").replace("komik/", "") if prev_link else ""
-
-        next_link = main.find("a", rel="next")
-        next_chap = urlparse(next_link["href"]).path.strip("/").replace("komik/", "") if next_link else ""
+        prev_link = main.find("a", rel="prev")["href"] if main.find("a", rel="prev") else ""
+        prev_chap = urlparse(prev_link).path.strip("/").replace("komik/", "")
+        next_link = main.find("a", rel="next")["href"] if main.find("a", rel="next") else ""
+        next_chap = urlparse(next_link).path.strip("/").replace("komik/", "")
 
         daftar_element = main.find("div", class_="nextprev")
-        daftar_chap = ""
-        if daftar_element:
-            daftar_chap_link = daftar_element.find("a", href=True, rel=False)
-            if daftar_chap_link:
-                daftar_chap = urlparse(daftar_chap_link["href"]).path.strip("/").replace("komik/", "")
+        daftar_chap_link = daftar_element.find("a", href=True, rel=False)["href"] if daftar_element else ""
+        daftar_chap = urlparse(daftar_chap_link).path.strip("/").replace("komik/", "")
 
         content_alt = link.strip("/").replace("-", " ").title()
-        images = main.find_all("img", alt=True)
-        main_content = [img["src"] for img in images if content_alt in img["alt"]]
+        content = main.find_all("img", alt=content_alt)
+        main_content = [img["src"] for img in content]
 
         return {
             "title": title,
@@ -181,3 +179,5 @@ def content(link):
             "next_chapter": next_chap,
             "content": main_content,
         }
+    except Exception as e:
+        return {"success": False, "message": f"Error: {str(e)}"}
