@@ -24,6 +24,8 @@ def api_terbaru(page):
 @api_routes.route('/api/popular/', methods=['GET'])
 def api_popular():
     komik_data = popular()
+    print("DEBUG: Data Popular ->", komik_data)
+
 
     data = OrderedDict([
         ("success", True),
