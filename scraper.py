@@ -74,8 +74,9 @@ def popular():
         title = komik.find("div", class_="tt").find("h4").text.strip()
         type = komik.find("span", class_="typeflag")["class"][1]
         warna_label = komik.find("div", class_="warnalabel")
-        warna = re.sub(r'\s+', ' ', warna_label.text.strip()) if warna_label else "Tidak Berwarna"        
-        chapter = re.sub(r'\s+', ' ', komik.find("div", class_="lsch").find("a").text.strip())
+        warna = re.sub(r'\s+', ' ', warna_label.text.strip()) if warna_label else "Tidak Berwarna"
+        kolom_chapter = komik.find("div", class_="lsch").find("a")
+        chapter = re.sub(r'\s+', ' ', kolom_chapter.text.strip()) if kolom_chapter else "null"
         last_update = komik.find("span", class_="datech").text.strip()
         data_list.append( {
                         "link": parsed_link,
