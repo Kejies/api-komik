@@ -142,9 +142,7 @@ def detail(link):
 
 def content(link):
     try:
-        base_url = f"https://komikindo2.com/{link}"
-        print(f"Request ke: {base_url}")  # Debugging log
-        
+        base_url = f"https://komikindo2.com/{link}"        
         res = requests.get(base_url)
         if res.status_code != 200:
             print(f"Error: Status Code {res.status_code}")
@@ -158,16 +156,13 @@ def content(link):
 
         title_elem = main.find("h1", class_="entry-title")
         title = title_elem.text.strip() if title_elem else "Tidak Diketahui"
-        print(f"Judul: {title}")  # Debugging log
 
-        # Cek chapter sebelumnya & berikutnya
         prev_link = main.find("a", rel="prev")
         prev_chap = urlparse(prev_link["href"]).path.strip("/").replace("komik/", "") if prev_link else ""
 
         next_link = main.find("a", rel="next")
         next_chap = urlparse(next_link["href"]).path.strip("/").replace("komik/", "") if next_link else ""
 
-        # Cek daftar chapter
         daftar_element = main.find("div", class_="nextprev")
         daftar_chap = ""
         if daftar_element:
@@ -175,7 +170,6 @@ def content(link):
             if daftar_chap_link:
                 daftar_chap = urlparse(daftar_chap_link["href"]).path.strip("/").replace("komik/", "")
 
-        # Ambil gambar
         content_alt = link.strip("/").replace("-", " ").title()
         images = main.find_all("img", alt=True)
         main_content = [img["src"] for img in images if content_alt in img["alt"]]
