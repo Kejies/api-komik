@@ -41,4 +41,4 @@ def api_content(link):
         "data": komik_data
     }
     
-    return jsonify(data)
+    return Response(jsonify(data).data, mimetype="application/json")
