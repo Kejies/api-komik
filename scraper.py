@@ -141,28 +141,49 @@ def detail(link):
     }
 
 def content(link):
-    base_url = f"https://komikindo2.com/{link}"
+    try:
+        base_url = f"https://komikindo2.com/{link}"
+        print(f"Request ke: {base_url}")  # Debugging log
+        
+        res = requests.get(base_url)
+        if res.status_code != 200:
+            print(f"Error: Status Code {res.status_code}")
+            return None
 
-    res = requests.get(base_url)
-    soup = BeautifulSoup(res.content, "html.parser")
-    main = soup.find("div", class_="chapter-area")
-    title = main.find("h1", class_="entry-title").text.strip()
-    prev_link = main.find("a", rel="prev")["href"] if main.find("a", rel="prev") else ""
-    prev_chap = urlparse(prev_link).path.strip("/").replace("komik/", "")
-    next_link = main.find("a", rel="next")["href"] if main.find("a", rel="next") else ""
-    next_chap = urlparse(next_link).path.strip("/").replace("komik/", "")
-    daftar_element = main.find("div", class_="nextprev")
-    daftar_chap_link = daftar_element.find("a", href=True, rel=False)["href"]
-    daftar_chap = urlparse(daftar_chap_link).path.strip("/").replace("komik/", "")
+        soup = BeautifulSoup(res.content, "html.parser")
+        main = soup.find("div", class_="chapter-area")
+        if not main:
+            print("Error: Tidak menemukan 'chapter-area'")
+            return None
 
-    content_alt = link.strip("/").replace("-", " ").title()
-    content = main.find_all("img", alt=content_alt)
-    main_content = [img["src"] for img in content]
-    data_list = {
-        "title": title,
-        "prev_chapter": prev_chap,
-        "daftar_chapter": daftar_chap,
-        "next_chapter": next_chap,
-        "content": main_content,
-    }
-    return data_list
+        title_elem = main.find("h1", class_="entry-title")
+        title = title_elem.text.strip() if title_elem else "Tidak Diketahui"
+        print(f"Judul: {title}")  # Debugging log
+
+        # Cek chapter sebelumnya & berikutnya
+        prev_link = main.find("a", rel="prev")
+        prev_chap = urlparse(prev_link["href"]).path.strip("/").replace("komik/", "") if prev_link else ""
+
+        next_link = main.find("a", rel="next")
+        next_chap = urlparse(next_link["href"]).path.strip("/").replace("komik/", "") if next_link else ""
+
+        # Cek daftar chapter
+        daftar_element = main.find("div", class_="nextprev")
+        daftar_chap = ""
+        if daftar_element:
+            daftar_chap_link = daftar_element.find("a", href=True, rel=False)
+            if daftar_chap_link:
+                daftar_chap = urlparse(daftar_chap_link["href"]).path.strip("/").replace("komik/", "")
+
+        # Ambil gambar
+        content_alt = link.strip("/").replace("-", " ").title()
+        images = main.find_all("img", alt=True)
+        main_content = [img["src"] for img in images if content_alt in img["alt"]]
+
+        return {
+            "title": title,
+            "prev_chapter": prev_chap,
+            "daftar_chapter": daftar_chap,
+            "next_chapter": next_chap,
+            "content": main_content,
+        }
