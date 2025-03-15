@@ -1,6 +1,6 @@
 from flask import Blueprint, Response
 import json
-import sys
+import logging
 from collections import OrderedDict
 from scraper import terbaru, popular
 
@@ -26,7 +26,7 @@ def api_terbaru(page):
 def api_popular():
     komik_data = popular()
 
-    print("DEBUG: Data Popular di Vercel ->", komik_data, file=sys.stderr)
+    logging.debug(f"DEBUG: Data Popular di Vercel -> {komik_data}")
 
     data = OrderedDict([
         ("success", True),
