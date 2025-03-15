@@ -5,7 +5,10 @@ from urllib.parse import urlparse
 
 def terbaru(page=1):
     base_url = f"https://komikindo2.com/komik-terbaru/page/{page}"
-    res = requests.get(base_url)
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+    }
+    res = requests.get(base_url, headers=headers)
 
     if res.status_code != 200:
         print(f"Error: Gagal mengambil data dari {base_url}, Status Code: {res.status_code}")
@@ -51,7 +54,10 @@ def terbaru(page=1):
 
 def popular():
     base_url = "https://komikindo2.com/"
-    res = requests.get(base_url)
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+    }
+    res = requests.get(base_url, headers=headers)
 
     if res.status_code != 200:
         print(f"Error: Gagal mengambil data dari {base_url}, Status Code: {res.status_code}")
