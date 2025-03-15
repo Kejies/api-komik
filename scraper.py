@@ -21,22 +21,24 @@ def terbaru(page=1):
     for komik in komik_list:
         link = komik.find("a")["href"]
         parsed_link = urlparse(link).path.strip("/").replace("komik/", "")
-        img_url = komik.find("img", itemprop="image")["src"]
-        title = komik.find("div", class_="tt").find("h4").text.strip()
+        img_tag = komik.find("img", itemprop="image")
+        img_url = img_tag["src"] if img_tag and "src" in img_tag.attrs else "null"
+        title_tag = komik.find("div", class_="tt")
+        title = title_tag.text.strip() if title_tag else "Tidak Ada Judul"
+
+        chapter_tag = komik.find("div", class_="lsch").find("a")
+        chapter = chapter_tag.text.strip() if chapter_tag else "null"
         type = komik.find("span", class_="typeflag")["class"][1]
         warna_label = komik.find("div", class_="warnalabel")
         warna = re.sub(r'\s+', ' ', warna_label.text.strip()) if warna_label else "Tidak Berwarna"
-        chapter = re.sub(r'\s+', ' ', komik.find("div", class_="lsch").find("a").text.strip())
+        # chapter = re.sub(r'\s+', ' ', komik.find("div", class_="lsch").find("a").text.strip())
         last_update = komik.find("span", class_="datech").text.strip()
 
         data_list.append({
             "link": parsed_link,
             "title": title,
-            "ratting": "null",
             "jenis": warna,
-            "view": "null",
             "type": type,
-            "status": "null",
             "chapter": chapter,
             "last_update": last_update,
             "img": img_url
@@ -64,12 +66,6 @@ def popular():
         return None, 0
 
     soup = BeautifulSoup(res.content, "html.parser")
-    komik_popular = soup.find("div", class_="post-show mangapopuler")
-
-    if not komik_popular:
-        print("Error: Tidak menemukan div dengan class 'post-show mangapopuler'")
-        return None, 0
-
     main_element = soup.find_all("div", class_="animposx")
 
     data_list = []
@@ -82,16 +78,13 @@ def popular():
         warna_label = komik.find("div", class_="warnalabel")
         warna = re.sub(r'\s+', ' ', warna_label.text.strip()) if warna_label else "Tidak Berwarna"
         kolom_chapter = komik.find("div", class_="lsch").find("a")
-        chapter = re.sub(r'\s+', ' ', kolom_chapter.text.strip()) if kolom_chapter else "null"
+        chapter = re.sub(r'\s+', ' ', kolom_chapter.text.strip()) if kolom_chapter else ""
         last_update = komik.find("span", class_="datech").text.strip()
         data_list.append( {
                         "link": parsed_link,
                         "title": title,
-                        "ratting": "null",
                         "jenis": warna,
-                        "view": "null",
                         "type": type,
-                        "status": "null",
                         "chapter": chapter,
                         "last_update": last_update,
                         "img": img_url
@@ -102,3 +95,74 @@ def popular():
 
     return data_list
 
+
+def detail(link):
+    base_url = f"https://komikindo2.com/komik/${link}"
+
+    res = requests.get(base_url)
+    soup = BeautifulSoup(res.content, "html.parser")
+    komik_detail = soup.find_all("div", class_="postbody")
+    data_list = {
+        "judul": "",
+        "img": "",
+        "ratting": "",
+        "judul_alternatif": "",
+        "status": "",
+        "pengarang": "",
+        "ilustrator": "",
+        "jenis": "",
+        "tema": [""],
+        "genre": ["", "", ""],
+        "short_sinopsis": "",
+        "sinopsis": "",
+        "spoiler": ["", "", ""],
+        "mirip": [
+            {
+                "url": "",
+                "img": "",
+                "title": "",
+                "subtitle": "",
+                "type": "",
+                "jenis": ""
+            }
+        ],
+        "chapter": [
+            {
+                "url": "",
+                "chapter": "",
+                "update": ""
+            },
+            {
+                "url": "",
+                "chapter": "",
+                "update": ""
+            }
+        ]
+    }
+
+def content(link):
+    base_url = f"https://komikindo2.com/{link}"
+
+    res = requests.get(base_url)
+    soup = BeautifulSoup(res.content, "html.parser")
+    main = soup.find("div", class_="chapter-area")
+    title = main.find("h1", class_="entry-title").text.strip()
+    prev_link = main.find("a", rel="prev")["href"] if main.find("a", rel="prev") else ""
+    prev_chap = urlparse(prev_link).path.strip("/").replace("komik/", "")
+    next_link = main.find("a", rel="next")["href"] if main.find("a", rel="next") else ""
+    next_chap = urlparse(next_link).path.strip("/").replace("komik/", "")
+    daftar_element = main.find("div", class_="nextprev")
+    daftar_chap_link = daftar_element.find("a", href=True, rel=False)["href"]
+    daftar_chap = urlparse(daftar_chap_link).path.strip("/").replace("komik/", "")
+
+    content_alt = link.strip("/").replace("-", " ").title()
+    content = main.find_all("img", alt=content_alt)
+    main_content = [img["src"] for img in content]
+    data_list = {
+        "title": title,
+        "prev_chapter": prev_chap,
+        "daftar_chapter": daftar_chap,
+        "next_chapter": next_chap,
+        "content": main_content,
+    }
+    return data_list

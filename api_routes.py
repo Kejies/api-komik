@@ -1,7 +1,7 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, Response
 import json
 import logging
-from scraper import terbaru, popular
+from scraper import terbaru, popular, content
 
 api_routes = Blueprint("api_routes", __name__)
 
@@ -17,13 +17,23 @@ def api_terbaru(page):
     "data": komik_data 
 }
     
-    return jsonify(data)
+    return Response(jsonify(data).data, mimetype="application/json")
 
 @api_routes.route('/api/popular/', methods=['GET'])
 def api_popular():
     komik_data = popular()
 
-    logging.debug(f"DEBUG: Data Popular di Vercel -> {komik_data}")
+    data = {
+        "success": True,
+        "message": "Berhasil mengambil data",
+        "data": komik_data
+    }
+    
+    return jsonify(data)
+
+@api_routes.route('/api/content/<path:link>', methods=['GET'])
+def api_content(link):
+    komik_data = content(link)
 
     data = {
         "success": True,
