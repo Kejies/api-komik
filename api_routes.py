@@ -13,7 +13,7 @@ def api_terbaru(page):
     "success": True,
     "message": "Berhasil mengambil data",
     "current_page": str(page),
-    "total_page": str(total_pages),
+    "total_pages": str(total_pages),
     "data": komik_data 
 }
     
