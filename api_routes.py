@@ -1,13 +1,7 @@
-<<<<<<< HEAD
 from flask import Blueprint, jsonify, Response
 import json
 from collections import OrderedDict
 from scraper import terbaru, popular, detail, content
-=======
-from flask import Blueprint, jsonify
-import logging
-from scraper import terbaru, popular, content
->>>>>>> 505741acd8ad308f50f1ccc78a2a938f7fa45822
 
 api_routes = Blueprint("api_routes", __name__)
 
@@ -16,14 +10,14 @@ def api_terbaru(page):
     komik_data, total_pages = terbaru(page)
 
     data = {
-        "success": True,
-        "message": "Berhasil mengambil data",
-        "current_page": str(page),
-        "total_pages": str(total_pages),
-        "data": komik_data
-    }
+    "success": True,
+    "message": "Berhasil mengambil data",
+    "current_page": str(page),
+    "total_pages": str(total_pages),
+    "data": komik_data 
+}
     
-    return jsonify(data) 
+    return Response(jsonify(data).data, mimetype="application/json")
 
 @api_routes.route('/api/popular/', methods=['GET'])
 def api_popular():
@@ -53,14 +47,10 @@ def api_detail(link):
 def api_content(link):
     komik_data = content(link)
 
-    return jsonify({
+    data = {
         "success": True,
         "message": "Berhasil mengambil data",
         "data": komik_data
-<<<<<<< HEAD
     }
     
     return Response(json.dumps(data, ensure_ascii=False, indent=4), mimetype="application/json")
-=======
-    })
->>>>>>> 505741acd8ad308f50f1ccc78a2a938f7fa45822
