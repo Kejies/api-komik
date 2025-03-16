@@ -44,7 +44,6 @@ def terbaru(page=1):
             "img": img_url
         })
 
-    # Ambil total halaman dari pagination
     pagination = soup.find("div", class_="pagination")
     if pagination:
         page_numbers = pagination.find_all("a", class_="page-numbers")
