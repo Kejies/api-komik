@@ -1,6 +1,5 @@
 from flask import Blueprint, jsonify, Response
 import json
-from collections import OrderedDict
 from scraper import terbaru, popular, detail, content
 
 api_routes = Blueprint("api_routes", __name__)
