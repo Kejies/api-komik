@@ -90,12 +90,15 @@ def popular():
     return data_list
 
 def detail(link):
-    base_url = f"https://komikindo2.com/komik/${link}"
-
-    res = requests.get(base_url)
+    base_url = f"https://komikindo2.com/komik/{link}"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+    }
+    res = requests.get(base_url, headers=headers)
     soup = BeautifulSoup(res.content, "html.parser")
     komik_detail = soup.find("div", class_="postbody")
-    title = komik_detail.find("h1", class_="entry_title")
+    dirty_title = komik_detail.find("h1", class_="entry-title", itemprop="name")
+    title = re.sub(r'\s+', ' ', dirty_title.text.strip()) if dirty_title else ""
     chap_container = komik_detail.find("div", class_="epsbaru")
 
     # Mengambil chapter pertama dan terakhir
@@ -125,8 +128,8 @@ def detail(link):
     related = []
     for r in related_container:
         link = urlparse(r.find("a", class_="series")["href"]).path.strip("/").replace("komik/", "")
-        img = r.find("img", itemprop="image")["src"]
-        title = r.find("img", itemprop="image")["title"]
+        rel_img = r.find("img", itemprop="image")["src"]
+        rel_title = r.find("img", itemprop="image")["title"]
         sinopsis = r.find("div", class_="excerptmirip").text.strip()
         tipe = r.find("span", class_="typeflag")["class"][-1]
         warna_label = r.find("div", class_="warnalabel")
@@ -134,8 +137,8 @@ def detail(link):
 
         related.append({
                 "link": link,
-                "img": img,
-                "title": title,
+                "img": rel_img,
+                "title": rel_title,
                 "sinopsis": sinopsis,
                 "variant": warna,
                 "Type": tipe
