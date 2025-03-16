@@ -239,11 +239,7 @@ def detail(link):
         "related": related,
         "chapter_list": chapter_list
     }
-    print(first_chap_title, last_chap_title)
     return data_list
-
-detail("reign")
-
 
 def content(link):
     try:
@@ -266,10 +262,13 @@ def content(link):
         daftar_chap_link = daftar_element.find("a", href=True, rel=False)["href"] if daftar_element else ""
         daftar_chap = urlparse(daftar_chap_link).path.strip("/").replace("komik/", "")
 
-        content_alt = link.strip("/").replace("-", " ").title()
-        content = main.find_all("img", alt=content_alt)
-        main_content = [img["src"] for img in content]
+        content_alt = title.replace("Komik", "")
+        content_container = main.find("div", class_="chapter-image eastengine bc")
+        content = content_container.select("img") if content_container else []
+        main_content = [img["src"] for img in content if "src" in img.attrs]
 
+
+        print(title.replace("Komik", ""))
         return {
             "title": title,
             "prev_chapter": prev_chap,
@@ -279,3 +278,55 @@ def content(link):
         }
     except Exception as e:
         return {"success": False, "message": f"Error: {str(e)}"}
+    
+def search(query):
+    search_url = f"https://komikindo2.com/?s={query.replace(' ', '+')}"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+    }
+
+    response = requests.get(search_url, headers=headers)
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    main_post = soup.find_all("div", class_="animepost")
+    print(f"DEBUG: {len(main_post)} animepost ditemukan")
+
+    komik_list = []
+
+    for post in main_post:
+        url_dirty = post.find("a", itemprop="url")["href"]
+        url = urlparse(url_dirty).path.strip("/").replace("komik/", "")
+        img = post.find("img", itemprop="image")["src"]
+        title = post.find("div", class_="tt").h4.text.strip() if post.find("div", class_="tt") else "Unknown"
+        ratting = post.find("div", class_="rating").find("i").text
+        warna_label = post.find("div", class_="warnalabel")
+        warna = re.sub(r'\s+', ' ', warna_label.text.strip()) if warna_label else "Tidak Berwarna"
+        tipe = post.find("span", class_="typeflag")["class"][-1] if post.find("span", class_="typeflag") else ""
+        detail_url = f"https://komikindo2.com/komik/{url}"
+        res = requests.get(detail_url, headers=headers)
+        soup = BeautifulSoup(res.text, "html.parser")
+        komik_detail = soup.find("div", class_="postbody")
+        chap_list_container = komik_detail.find("div", id="chapter_list")
+        chapter =  re.sub(r'\s+', ' ', chap_list_container.find_all("li")[0].text.strip()) if chap_list_container.find_all("li")[0] else ""
+        
+        komik_list.append({
+            "title": title,
+            "url": url,
+            "image": img,
+            "ratting": ratting,
+            "type": tipe,
+            "chapter": chapter,
+            "variant": warna
+        })
+    return komik_list
+
+# Contoh penggunaan
+results = search("lookism")
+for komik in results:
+    print(f"📌 {komik['title']}")
+    print(f"🔗 Link: {komik['url']}")
+    print(f"🖼️ Image: {komik['image']}")
+    print(f"🖼️ Image: {komik['variant']}")
+    print(f"🖼️ Image: {komik['type']}")
+    print(f"🖼️ Image: {komik['chapter']}")
+    print("-" * 50)
