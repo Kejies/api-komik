@@ -89,6 +89,11 @@ def popular():
             break
     return data_list
 
+import requests
+from bs4 import BeautifulSoup
+import re
+from urllib.parse import urlparse
+
 def detail(link):
     base_url = f"https://komikindo2.com/komik/{link}"
     headers = {
@@ -97,85 +102,148 @@ def detail(link):
     res = requests.get(base_url, headers=headers)
     soup = BeautifulSoup(res.content, "html.parser")
     komik_detail = soup.find("div", class_="postbody")
+
+    # Judul
     dirty_title = komik_detail.find("h1", class_="entry-title", itemprop="name")
     title = re.sub(r'\s+', ' ', dirty_title.text.strip()) if dirty_title else ""
+
+    # Chapter pertama dan terakhir
     chap_container = komik_detail.find("div", class_="epsbaru")
+    first_chap = last_chap = ""
+    if chap_container:
+        first_chap_link = chap_container.find("div", class_="epsbr chapter-awal")
+        last_chap_link = chap_container.find_all("div", class_="epsbr")
 
-    # Mengambil chapter pertama dan terakhir
-    first_chap_link = chap_container.find("div", class_="epsbr chapter-awal").find("a", href=True)["href"]
-    first_chap = urlparse(first_chap_link).path.strip("/").replace("komik/", "")
-    last_chap_link = chap_container.find_all("div", class_="epsbr")[-1].find("a", href=True)["href"]
-    last_chap = urlparse(last_chap_link).path.strip("/").replace("komik/", "")
+        if first_chap_link and first_chap_link.find("a", href=True):
+            first_chap = urlparse(first_chap_link.find("a", href=True)["href"]).path.strip("/").replace("komik/", "")
+            first_chap_title = re.sub(r'\s+', ' ', first_chap_link.find("span", class_="barunew").text.strip())
+
+        if last_chap_link:
+            last_chap = urlparse(last_chap_link[-1].find("a", href=True)["href"]).path.strip("/").replace("komik/", "")
+            last_chap_title = re.sub(r'\s+', ' ', last_chap_link[-1].find("span", class_="barunew").text.strip())
+
+    # Gambar
     img_container = komik_detail.find("div", class_="thumb", itemprop="image")
-    img = komik_detail.find("img", itemprop="image")["src"] if img_container and img_container.find("img", itemprop="image") else None
-    ratting = komik_detail.find("i", itemprop="ratingValue").text.strip()
-    info_container = komik_detail.find("div", class_="spe").find_all("span")
-    info_komik = []
-    for span in info_container:
-        b_tag = span.find("b")
-        if b_tag:
-            b_tag.extract() 
-        alternative_title_text = span.text.strip()
-        info_komik.append(alternative_title_text)
-    short_sinopsis =  re.sub(r'\s+', ' ', komik_detail.find("div", class_="shortcsc sht2").find("p").text.strip()) 
-    sinopsis =  re.sub(r'\s+', ' ', komik_detail.find("div", id="sinopsis").find("p").text.strip())
-    genre_container = komik_detail.find("div", class_="genre-info").find_all("a")
-    genre = []
-    for a in genre_container:
-        text = a.text.strip()
-        genre.append(text)
-    related_container = komik_detail.find("div", class_="miripmanga").find_all("li")
-    related = []
-    for r in related_container:
-        link = urlparse(r.find("a", class_="series")["href"]).path.strip("/").replace("komik/", "")
-        rel_img = r.find("img", itemprop="image")["src"]
-        rel_title = r.find("img", itemprop="image")["title"]
-        sinopsis = r.find("div", class_="excerptmirip").text.strip()
-        tipe = r.find("span", class_="typeflag")["class"][-1]
-        warna_label = r.find("div", class_="warnalabel")
-        warna = re.sub(r'\s+', ' ', warna_label.text.strip()) if warna_label else "Tidak Berwarna"
+    img = img_container.find("img", itemprop="image")["src"] if img_container and img_container.find("img", itemprop="image") else ""
 
-        related.append({
+    # Rating
+    ratting = komik_detail.find("i", itemprop="ratingValue")
+    ratting = ratting.text.strip() if ratting else ""
+
+    # Informasi tambahan
+    info_container = komik_detail.find("div", class_="spe")
+    alternative_title = status = author = ilustrator = jenis_komik = ""
+    tema = []
+
+    if info_container:
+        spans = info_container.find_all("span")
+
+        for span in spans:
+            label = span.find("b")
+            if label:
+                key = label.text.strip().lower().replace(":", "")
+
+                # Hapus <b> agar hanya menyisakan nilai teks setelahnya
+                label.extract()
+                value = span.text.strip()
+
+                if key == "judul alternatif":
+                    alternative_title = value
+                elif key == "status":
+                    status = value
+                elif key == "pengarang":
+                    author = value
+                elif key == "ilustrator":
+                    ilustrator = value
+                elif key == "jenis komik":
+                    jenis_komik = span.find("a").text.strip() if span.find("a") else value
+                elif key == "tema":
+                    tema = [a.text.strip() for a in span.find_all("a")] if span.find("a") else [value]
+
+    # Sinopsis
+    short_sinopsis = ""
+    sinopsis = ""
+    short_sinopsis_tag = komik_detail.find("div", class_="shortcsc sht2")
+    sinopsis_tag = komik_detail.find("div", id="sinopsis")
+
+    if short_sinopsis_tag and short_sinopsis_tag.find("p"):
+        short_sinopsis = re.sub(r'\s+', ' ', short_sinopsis_tag.find("p").text.strip())
+
+    if sinopsis_tag and sinopsis_tag.find("p"):
+        sinopsis = re.sub(r'\s+', ' ', sinopsis_tag.find("p").text.strip())
+
+    # Genre
+    genre_container = komik_detail.find("div", class_="genre-info")
+    genre = [a.text.strip() for a in genre_container.find_all("a")] if genre_container else []
+
+    # Komik terkait
+    related_container = komik_detail.find("div", class_="miripmanga")
+    related = []
+    if related_container:
+        for r in related_container.find_all("li"):
+            link = urlparse(r.find("a", class_="series")["href"]).path.strip("/").replace("komik/", "") if r.find("a", class_="series") else ""
+            rel_img = r.find("img", itemprop="image")["src"] if r.find("img", itemprop="image") else ""
+            rel_title = r.find("img", itemprop="image")["title"] if r.find("img", itemprop="image") else ""
+            sinopsis = r.find("div", class_="excerptmirip").text.strip() if r.find("div", class_="excerptmirip") else ""
+            tipe = r.find("span", class_="typeflag")["class"][-1] if r.find("span", class_="typeflag") else ""
+            warna_label = r.find("div", class_="warnalabel")
+            warna = re.sub(r'\s+', ' ', warna_label.text.strip()) if warna_label else "Tidak Berwarna"
+
+            related.append({
                 "link": link,
                 "img": rel_img,
                 "title": rel_title,
                 "sinopsis": sinopsis,
                 "variant": warna,
-                "Type": tipe
-        })
+                "type": tipe
+            })
 
-    chap_list_container = komik_detail.find("div", id="chapter_list").find_all("li")
+    # Daftar chapter
+    chap_list_container = komik_detail.find("div", id="chapter_list")
     chapter_list = []
-    for chapter in chap_list_container:
-        link = chapter.find("a")
-        chap = re.sub(r'\s+', ' ', link.text.strip())
-        update = chapter.find("span", class_="dt").find("a").text.strip()
-        
-        chapter_list.append({
-                "link": link["href"],
+    if chap_list_container:
+        for chapter in chap_list_container.find_all("li"):
+            link = chapter.find("a")
+            chap = re.sub(r'\s+', ' ', link.text.strip()) if link else ""
+            update = chapter.find("span", class_="dt")
+            update = update.find("a").text.strip() if update and update.find("a") else ""
+
+            chapter_list.append({
+                "link": urlparse(link["href"]).path.strip("/").replace("komik/", "") if link else "",
                 "chapter": chap,
                 "update": update
-        })
+            })
 
+    # Data akhir
     data_list = {
         "title": title,
-        "first_chapter": first_chap,
-        "last_chapter": last_chap,
+        "first_chapter": {
+            "title": first_chap_title,
+            "chapter_url": first_chap,
+        },
+        "last_chapter": {
+            "title": last_chap_title,
+            "chapter_url": last_chap,
+        },
         "img": img,
         "ratting": ratting,
-        "alternative_title": info_komik[0],
-        "status": info_komik[1],
-        "author": info_komik[2],
-        "ilustrator": info_komik[3],
-        "Type": info_komik[6],
-        "tema": info_komik[5],
+        "alternative_title": alternative_title,
+        "status": status,
+        "author": author,
+        "ilustrator": ilustrator,
+        "type": jenis_komik,
+        "tema": ", ".join(tema),
         "genre": genre,
         "short_sinopsis": short_sinopsis,
         "sinopsis": sinopsis,
         "related": related,
         "chapter_list": chapter_list
     }
+    print(first_chap_title, last_chap_title)
     return data_list
+
+detail("reign")
+
 
 def content(link):
     try:
