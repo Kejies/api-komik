@@ -20,12 +20,12 @@
     <div class="container mx-auto p-6">
       <header class="text-center py-6">
         <h1 class="text-4xl font-bold text-blue-400">📖 Dokumentasi API Komik</h1>
-        <p class="text-gray-400 mt-2">API untuk mendapatkan informasi komik terbaru.</p>
+        <p class="text-gray-400 mt-2">API untuk mendapatkan komik terbaru.</p>
       </header>
 
       <div class="bg-gray-800 p-5 rounded-xl mb-6">
-        <h2 class="text-2xl font-semibold text-blue-300">📌 Endpoint Utama</h2>
-        <p class="mt-2 text-gray-300">🔗 <a href="https://apikomik.vercel.app/api" class="text-blue-400 hover:underline">https://apikomik.vercel.app/api</a></p>
+        <h2 class="text-2xl font-semibold text-blue-300">📌 Endpoint</h2>
+        <p class="inline-block mt-2 text-gray-300 bg-gray-700 p-2 rounded-xl">https://apikomik.vercel.app/api</p>
       </div>
 
       <div id="accordion">
@@ -46,11 +46,8 @@
                   {
                     "link": "",
                     "title": "",
-                    "ratting": "",
-                    "jenis": "",
-                    "view": "",
+                    "variant": "",
                     "type": "",
-                    "status": "",
                     "chapter": "",
                     "last_update": "",
                     "img": ""
@@ -71,7 +68,7 @@
             <p class="text-gray-400">Mengambil daftar komik terbaru berdasarkan halaman.</p>
             <p class="text-gray-400"><strong>Parameters:</strong></p>
             <ul class="list-disc pl-5 text-gray-300">
-              <li><code>page</code> (integer, opsional) - Nomor halaman yang ingin diambil.</li>
+              <li><code class="bg-gray-700 rounded-lg p-1">page</code> (integer, opsional) → Nomor halaman yang ingin diambil.</li>
             </ul>
             <p class="text-gray-400">Example Response:</p>
             <pre class="bg-gray-700 p-3 rounded text-sm overflow-x-auto text-green-300">
@@ -83,11 +80,8 @@
                   "total_page": "",
                   "link": "",
                   "title": "",
-                  "ratting": "",
-                  "jenis": "",
-                  "view": "",
+                  "variant": "",
                   "type": "",
-                  "status": "",
                   "chapter": "",
                   "last_update": "",
                   "img": ""
@@ -100,14 +94,14 @@
         <!-- GET detail/{link} -->
         <div class="mb-4">
           <button class="accordion-header flex items-center justify-between w-full p-5 font-medium bg-gray-800 text-gray-300 rounded-xl" onclick="toggleAccordion(3)">
-            <span class="flex items-center">🔍 GET detail/{link}</span>
+            <span class="flex items-center">📖 GET /detail/{link}</span>
             <span class="text-blue-300">▼</span>
           </button>
           <div id="accordion-body-3" class="hidden p-5 bg-gray-900 border border-gray-700 rounded-b-xl">
             <p class="text-gray-400">Mengambil detail komik berdasarkan link yang diberikan.</p>
             <p class="text-gray-400"><strong>Parameters:</strong></p>
             <ul class="list-disc pl-5 text-gray-300">
-              <li><code>link</code> (string, wajib) - Link unik dari komik yang ingin diambil datanya.</li>
+              <li><code class="bg-gray-700 rounded-lg p-1">link</code> (string, wajib) → Link unik dari komik yang ingin diambil datanya.</li>
             </ul>
             <p class="text-gray-400">Example Response:</p>
             <pre class="bg-gray-700 p-3 rounded text-sm overflow-x-auto text-green-300">
@@ -115,6 +109,34 @@
                 "success": true,
                 "message": "Berhasil mengambil data",
                 "data": {
+                  "title": "",
+                  "first_chapter": "",
+                  "last_chapter": "",
+                  "img": "",
+                  "ratting": "",
+                  "alternative_title": "",
+                  "status": "",
+                  "author": "",
+                  "ilustrator": "",
+                  "Type": "",
+                  "tema": "",
+                  "genre": "",
+                  "short_sinopsis": "",
+                  "sinopsis": "",
+                  "related": [{
+                    "link": "",
+                    "img": "",
+                    "title": "",
+                    "sinopsis": "",
+                    "variant": "",
+                    "Type": "",
+                  }],
+                  "chapter_list": [
+                  {
+                      "link": "",
+                      "chapter": "",
+                      "update": ""
+                  }]
                 }
               }
             </pre>
@@ -123,15 +145,15 @@
 
         <!-- GET detail/{link} -->
         <div class="mb-4">
-          <button class="accordion-header flex items-center justify-between w-full p-5 font-medium bg-gray-800 text-gray-300 rounded-xl" onclick="toggleAccordion(3)">
-            <span class="flex items-center">📜 GET content/{link}</span>
+          <button class="accordion-header flex items-center justify-between w-full p-5 font-medium bg-gray-800 text-gray-300 rounded-xl" onclick="toggleAccordion(4)">
+            <span class="flex items-center">📜 GET /content/{link}</span>
             <span class="text-blue-300">▼</span>
           </button>
-          <div id="accordion-body-3" class="hidden p-5 bg-gray-900 border border-gray-700 rounded-b-xl">
+          <div id="accordion-body-4" class="hidden p-5 bg-gray-900 border border-gray-700 rounded-b-xl">
             <p class="text-gray-400">Mendapatkan konten bacaan dari sebuah komik berdasarkan link yang diberikan.</p>
             <p class="text-gray-400"><strong>Parameters:</strong></p>
             <ul class="list-disc pl-5 text-gray-300">
-              <li><code>link</code>  (string, wajib) → Parameter ini adalah bagian unik dari URL komik yang digunakan untuk mengambil kontennya. Link ini bisa berupa slug atau ID spesifik dari komik yang ingin dibaca.</li>
+              <li><code class="bg-gray-700 rounded-lg p-1">link</code>  (string, wajib) → Parameter ini adalah bagian unik dari URL komik yang digunakan untuk mengambil kontennya. Link ini bisa berupa slug atau ID spesifik dari komik yang ingin dibaca.</li>
             </ul>
             <p class="text-gray-400">Example Response:</p>
             <pre class="bg-gray-700 p-3 rounded text-sm overflow-x-auto text-green-300">
@@ -146,6 +168,37 @@
                   "content": "",
                 }
               }
+            </pre>
+          </div>
+        </div>
+        <!-- GET search/{title} -->
+        <div class="mb-4">
+          <button class="accordion-header flex items-center justify-between w-full p-5 font-medium bg-gray-800 text-gray-300 rounded-xl" onclick="toggleAccordion(5)">
+            <span class="flex items-center">🔎 GET /search/{title}</span>
+            <span class="text-blue-300">▼</span>
+          </button>
+          <div id="accordion-body-5" class="hidden p-5 bg-gray-900 border border-gray-700 rounded-b-xl">
+            <p class="text-gray-400">Endpoint ini digunakan untuk mencari komik berdasarkan judul yang diberikan. API akan mengembalikan daftar komik yang sesuai dengan pencarian. </p>
+            <p class="text-gray-400"><strong>Parameters:</strong></p>
+            <ul class="list-disc pl-5 text-gray-300">
+              <li><code class="bg-gray-700 rounded-lg p-1">title</code> (string, wajib) → Judul atau kata kunci dari komik yang ingin dicari.</li>
+            </ul>
+            <p class="text-gray-400">Example Response:</p>
+            <pre class="bg-gray-700 p-3 rounded text-sm overflow-x-auto text-green-300">
+              {
+                "success": true,
+                "message": "Berhasil mengambil data",
+                "data": [
+                  "link": "",
+                  "title": "",
+                  "variant": "",
+                  "type": "",
+                  "chapter": "",
+                  "last_update": "",
+                  "img": ""
+                ]
+              }
+              
             </pre>
           </div>
         </div>

@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, Response
 import json
-import logging
-from scraper import terbaru, popular, content
+from collections import OrderedDict
+from scraper import terbaru, popular, detail, content
 
 api_routes = Blueprint("api_routes", __name__)
 
@@ -29,7 +29,19 @@ def api_popular():
         "data": komik_data
     }
     
-    return jsonify(data)
+    return Response(json.dumps(data, ensure_ascii=False, indent=4), mimetype="application/json")
+
+@api_routes.route('/api/detail/<path:link>', methods=['GET'])
+def api_detail(link):
+    komik_data = detail(link)
+
+    data = {
+        "success": True,
+        "message": "Berhasil mengambil data",
+        "data": komik_data
+    }
+    
+    return Response(json.dumps(data, ensure_ascii=False, indent=4), mimetype="application/json")
 
 @api_routes.route('/api/content/<path:link>', methods=['GET'])
 def api_content(link):
@@ -41,4 +53,4 @@ def api_content(link):
         "data": komik_data
     }
     
-    return jsonify(data)
+    return Response(json.dumps(data, ensure_ascii=False, indent=4), mimetype="application/json")
