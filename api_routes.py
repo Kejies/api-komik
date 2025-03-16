@@ -34,13 +34,6 @@ def api_popular():
 def api_content(link):
     komik_data = content(link)
 
-    if komik_data is None:
-        return jsonify({
-            "success": False,
-            "message": "Gagal mengambil data. Pastikan link benar atau coba lagi nanti.",
-            "data": None
-        }), 404
-
     return jsonify({
         "success": True,
         "message": "Berhasil mengambil data",
