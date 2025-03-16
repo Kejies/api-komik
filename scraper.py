@@ -98,6 +98,7 @@ def detail(link):
     title = komik_detail.find("h1", class_="entry_title")
     chap_container = komik_detail.find("div", class_="epsbaru")
 
+<<<<<<< HEAD
     # Mengambil chapter pertama dan terakhir
     first_chap_link = chap_container.find("div", class_="epsbr chapter-awal").find("a", href=True)["href"]
     first_chap = urlparse(first_chap_link).path.strip("/").replace("komik/", "")
@@ -185,6 +186,26 @@ def content(link):
         main = soup.find("div", class_="chapter-area")
 
         title = re.sub(r'\s+', ' ', main.find("h1", class_="entry-title").text.strip()) if main.find("h1", class_="entry-title") else ""
+=======
+def content(link):
+    try:
+        base_url = f"https://komikindo2.com/{link}"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+        }
+        res = requests.get(base_url, headers=headers)
+
+        if res.status_code != 200:
+            return {"success": False, "message": f"Gagal mengambil data dari {base_url}, Status Code: {res.status_code}"}
+
+        soup = BeautifulSoup(res.content, "html.parser")
+        main = soup.find("div", class_="chapter-area")
+
+        if not main:
+            return {"success": False, "message": "Halaman tidak ditemukan atau struktur berubah"}
+
+        title = main.find("h1", class_="entry-title").text.strip()
+>>>>>>> 505741acd8ad308f50f1ccc78a2a938f7fa45822
 
         prev_link = main.find("a", rel="prev")["href"] if main.find("a", rel="prev") else ""
         prev_chap = urlparse(prev_link).path.strip("/").replace("komik/", "")
@@ -207,4 +228,8 @@ def content(link):
             "content": main_content,
         }
     except Exception as e:
+<<<<<<< HEAD
         return {"success": False, "message": f"Error: {str(e)}"}
+=======
+        return {"success": False, "message": f"Error: {str(e)}"}
+>>>>>>> 505741acd8ad308f50f1ccc78a2a938f7fa45822
