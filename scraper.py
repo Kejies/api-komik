@@ -371,7 +371,7 @@ def get_manhua_list(page=1):
     data_list = []
     for komik in komik_list:
         link = komik.find("a")["href"]
-        parsed_link = urlparse(link).path.strip("/").replace("manga/", "")
+        parsed_link = urlparse(link).path.strip("/").replace("komik/", "")
         img_tag = komik.find("img", itemprop="image")
         img_url = img_tag["src"] if img_tag and "src" in img_tag.attrs else "null"
         title_tag = komik.find("div", class_="tt").find("h4")
