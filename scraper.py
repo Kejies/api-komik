@@ -239,7 +239,7 @@ def content(link):
     return {
         "title": title,
         "prev_chapter": prev_chap,
-        "daftar_chapter": daftar_chap,
+        "daftar_chapter": daftar_chap_link,
         "next_chapter": next_chap,
         "content": main_content,
     }
