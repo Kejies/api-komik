@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, Response
 import json
-from scraper import terbaru, popular, detail, content, search, find_genre, get_manhua_list, get_search_manhua, get_manhua_content, get_manhua_detail
+from scraper import terbaru, popular, detail, search, find_genre, get_manhua_list, get_search_manhua, get_comic_content, get_manga_detail
 
 api_routes = Blueprint("api_routes", __name__)
 
@@ -33,25 +33,24 @@ def api_popular():
 @api_routes.route('/api/detail/<path:link>', methods=['GET'])
 def api_detail(link):
     komik_data = detail(link)
-    manhua_data = get_manhua_detail(link)
+    manhua_data = get_manga_detail(link)
 
     data = {
         "success": True,
         "message": "Berhasil mengambil data",
-        "data": [komik_data, manhua_data]
+        "data": manhua_data
     }
     
     return Response(json.dumps(data, ensure_ascii=False, indent=4), mimetype="application/json")
 
 @api_routes.route('/api/content/<path:link>', methods=['GET'])
 def api_content(link):
-    komik_data = content(link)
-    manhua_data = get_manhua_content(link)
+    komik_data = get_comic_content(link)
 
     data = {
         "success": True,
         "message": "Berhasil mengambil data",
-        "data": [komik_data, manhua_data]
+        "data": komik_data
     }
     
     return Response(json.dumps(data, ensure_ascii=False, indent=4), mimetype="application/json")
