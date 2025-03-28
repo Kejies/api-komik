@@ -106,7 +106,7 @@ def detail(link):
 
     # Informasi tambahan
     info_container = komik_detail.find("div", class_="tsinfo bixbox")
-    status = author = artist = typeKomik = realeased = ""
+    status = author = artist = typeKomik = released = ""
     if info_container:
         divs = info_container.find_all("div", class_="imptdt")
 
@@ -120,7 +120,7 @@ def detail(link):
             elif "type" in key:
                 typeKomik = div.find("a").text.strip() if div.find("a") else ""
             elif "released" in key:
-                realeased = value
+                released = value
             elif "author" in key:
                 author = value
             elif "artist" in key:
@@ -190,7 +190,7 @@ def detail(link):
         "status": status,
         "author": author,
         "artist": artist,
-        "realeased": realeased,
+        "realeased": released,
         "type": typeKomik,
         "genre": genre,
         "sinopsis": sinopsis,
