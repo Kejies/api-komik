@@ -361,8 +361,8 @@ def get_search_manhua(query):
         print(komik_list)
     return komik_list
 
-def get_manhua_list():
-    base_url = f"https://komikindo2.com/manhua/"
+def get_manhua_list(page=1):
+    base_url = f"https://komikindo2.com/manhua/page/{page}"
     res = requests.get(base_url, headers=headers)
     soup = BeautifulSoup(res.content, "html.parser")
     komik_container = soup.find("div", class_="postbody")
