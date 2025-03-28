@@ -70,11 +70,21 @@ def terbaru(page=1):
         })
 
     pagination = soup.find("div", class_="pagination")
+
     if pagination:
-        page_numbers = pagination.find_all("a", class_="page-numbers")
-        total_pages = int(page_numbers[-2].text.strip()) if page_numbers else 1
+        page_numbers = [a.text.strip() for a in pagination.find_all("a", class_="page-numbers") if a.text.strip().isdigit()]
+        
+        total_pages = int(max(page_numbers)) if page_numbers else 1
     else:
         total_pages = 1
+
+    current_page_elem = soup.find("span", class_="page-numbers current")
+    current_page = int(current_page_elem.text.strip()) if current_page_elem else 1
+
+    if current_page >= total_pages:
+        total_pages = current_page
+
+
     return data_list, total_pages
 
 def detail(link):
@@ -310,9 +320,17 @@ def find_genre(genre, page=1):
         })
 
     pagination = soup.find("div", class_="pagination")
+
     if pagination:
-        page_numbers = pagination.find_all("a", class_="page-numbers")
-        total_pages = int(page_numbers[-2].text.strip()) if page_numbers else 1
+        page_numbers = [a.text.strip() for a in pagination.find_all("a", class_="page-numbers") if a.text.strip().isdigit()]
+        
+        total_pages = int(max(page_numbers)) if page_numbers else 1
     else:
         total_pages = 1
+
+    current_page_elem = soup.find("span", class_="page-numbers current")
+    current_page = int(current_page_elem.text.strip()) if current_page_elem else 1
+
+    if current_page >= total_pages:
+        total_pages = current_page
     return data_list, total_pages
