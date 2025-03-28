@@ -186,6 +186,7 @@ def detail(link):
             "chapter_url": urlparse(chap_li[0].find("a")["href"]).path.strip("/"),
         },
         "img": img,
+        "href": link,
         "ratting": ratting,
         "status": status,
         "author": author,
