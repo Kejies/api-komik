@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, Response
 import json
-from scraper import terbaru, popular, detail, content, search
+from scraper import terbaru, popular, detail, content, search, find_genre
 
 api_routes = Blueprint("api_routes", __name__)
 
@@ -63,5 +63,20 @@ def api_search(query):
         "message": "Berhasil mengambil data",
         "data": komik_data
     }
+    
+    return Response(json.dumps(data, ensure_ascii=False, indent=4), mimetype="application/json")
+
+@api_routes.route('/api/genre/<path:genre>/', defaults={'page': 1}, methods=['GET'])
+@api_routes.route('/api/genre/<path:genre>/page/<int:page>', methods=['GET'])
+def api_genre(genre, page):
+    komik_data, total_pages = find_genre(genre, page)
+
+    data = {
+    "success": True,
+    "message": "Berhasil mengambil data",
+    "current_page": str(page),
+    "total_pages": str(total_pages),
+    "data": komik_data 
+}
     
     return Response(json.dumps(data, ensure_ascii=False, indent=4), mimetype="application/json")
