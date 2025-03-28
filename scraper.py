@@ -190,6 +190,7 @@ def detail(link):
         "status": status,
         "author": author,
         "artist": artist,
+        "realeased": realeased,
         "type": typeKomik,
         "genre": genre,
         "sinopsis": sinopsis,
