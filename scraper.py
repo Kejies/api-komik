@@ -198,9 +198,8 @@ def detail(link):
         "related": related,
         "chapter_list": chapter_list
     }
-    print(data_list)
     return data_list
-detail("lookism")
+
 def get_daftar_chapter(link):
     base_url = f"{BASE_URL}manga/{link}"
     res = requests.get(base_url, headers=headers)
@@ -259,15 +258,10 @@ def content(link):
     
 def search(query):
     search_url = f"{BASE_URL}?s={query.replace(' ', '+')}"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
-    }
-
     response = requests.get(search_url, headers=headers)
     soup = BeautifulSoup(response.text, "html.parser")
     main = soup.find("div", class_="listupd")
     main_post = main.find_all("div", class_="bs")
-    print(f"DEBUG: {len(main_post)} animepost ditemukan")
 
     komik_list = []
 
@@ -336,4 +330,81 @@ def find_genre(genre, page=1):
 
     if current_page >= total_pages:
         total_pages = current_page
+    return data_list, total_pages
+
+def get_search_manhua(query):
+    search_url = f"https://komikindo2.com/daftar-manga/?status=&type=Manhua&format=&order=&title={query.replace(' ', '+')}"
+    response = requests.get(search_url, headers=headers)
+    soup = BeautifulSoup(response.text, "html.parser")
+    main = soup.find("div", class_="listupd")
+    main_post = main.find_all("div", class_="animepost")
+
+    komik_list = []
+
+    for komik in main_post:
+        link = komik.find("a")["href"]
+        parsed_link = urlparse(link).path.strip("/").replace("komik/", "")
+        img_tag = komik.find("img", itemprop="image")
+        img_url = img_tag["src"] if img_tag and "src" in img_tag.attrs else "null"
+        title_tag = komik.find("div", class_="tt").find("h4")
+        title = title_tag.text.strip() if title_tag else "Tidak Ada Judul"
+        tipe = komik.find("span", class_="typeflag")["class"][1]
+        warna = komik.find("div", class_="warnalabel").text.strip() if komik.find("div", class_="warnalabel") else ""
+
+        komik_list.append({
+            "link": parsed_link,
+            "title": title,
+            "colored": warna,
+            "type": tipe,
+            "img": img_url
+        })
+        print(komik_list)
+    return komik_list
+
+def get_manhua_list():
+    base_url = f"https://komikindo2.com/manhua/"
+    res = requests.get(base_url, headers=headers)
+    soup = BeautifulSoup(res.content, "html.parser")
+    komik_container = soup.find("div", class_="postbody")
+    komik_list = komik_container.find_all("div", class_="animepost")
+
+    data_list = []
+    for komik in komik_list:
+        link = komik.find("a")["href"]
+        parsed_link = urlparse(link).path.strip("/").replace("manga/", "")
+        img_tag = komik.find("img", itemprop="image")
+        img_url = img_tag["src"] if img_tag and "src" in img_tag.attrs else "null"
+        title_tag = komik.find("div", class_="tt").find("h4")
+        title = title_tag.text.strip() if title_tag else ""
+        chapter = komik.find("a", itemprop="url").text.strip()
+        chapter = " ".join(chapter.split())
+        tipe = komik.find("span", class_="typeflag")["class"][1] if komik.find("span", class_="typeflag") else ""
+        warna = komik.find("div", class_="warnalabel").text.strip() if komik.find("div", class_="warnalabel") else ""
+        last_update = komik.find("span", class_="datech").text.strip()
+
+        data_list.append({
+            "link": parsed_link,
+            "title": title,
+            "colored": warna,
+            "type": tipe,
+            "chapter": chapter,
+            "last_update": last_update,
+            "img": img_url
+        })
+
+    pagination = soup.find("div", class_="pagination")
+
+    if pagination:
+        page_numbers = [a.text.strip() for a in pagination.find_all("a", class_="page-numbers") if a.text.strip().isdigit()]
+        
+        total_pages = int(max(page_numbers)) if page_numbers else 1
+    else:
+        total_pages = 1
+
+    current_page_elem = soup.find("span", class_="page-numbers current")
+    current_page = int(current_page_elem.text.strip()) if current_page_elem else 1
+
+    if current_page >= total_pages:
+        total_pages = current_page
+
     return data_list, total_pages

@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, Response
 import json
-from scraper import terbaru, popular, detail, content, search, find_genre
+from scraper import terbaru, popular, detail, content, search, find_genre, get_manhua_list, get_search_manhua
 
 api_routes = Blueprint("api_routes", __name__)
 
@@ -57,11 +57,12 @@ def api_content(link):
 @api_routes.route('/api/search/<path:query>', methods=['GET'])
 def api_search(query):
     komik_data = search(query)
+    manhua_data = get_search_manhua(query)
 
     data = {
         "success": True,
         "message": "Berhasil mengambil data",
-        "data": komik_data
+        "data": [komik_data, manhua_data]
     }
     
     return Response(json.dumps(data, ensure_ascii=False, indent=4), mimetype="application/json")
@@ -72,11 +73,24 @@ def api_genre(genre, page):
     komik_data, total_pages = find_genre(genre, page)
 
     data = {
-    "success": True,
-    "message": "Berhasil mengambil data",
-    "current_page": str(page),
-    "total_pages": str(total_pages),
-    "data": komik_data 
-}
+        "success": True,
+        "message": "Berhasil mengambil data",
+        "current_page": str(page),
+        "total_pages": str(total_pages),
+        "data": komik_data 
+    }
     
+    return Response(json.dumps(data, ensure_ascii=False, indent=4), mimetype="application/json")
+
+@api_routes.route('/api/manhua/', methods=['GET'])
+def api_get_manhua(page=1):
+    komik_data, total_pages = get_manhua_list()
+
+    data = {
+        "success": True,
+        "message": "Berhasil mengambil data",
+        "current_page": str(page),
+        "total_pages": str(total_pages),
+        "data": komik_data 
+    }
     return Response(json.dumps(data, ensure_ascii=False, indent=4), mimetype="application/json")
