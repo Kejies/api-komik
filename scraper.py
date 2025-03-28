@@ -139,8 +139,8 @@ def detail(link):
     related = []
     if related_container:
         for komik in related_container.find_all("div", class_="bsx"):
-            link = komik.find("a")["href"]
-            parsed_link = urlparse(link).path.strip("/").replace("manga/", "")
+            linkrel = komik.find("a")["href"]
+            parsed_link = urlparse(linkrel).path.strip("/").replace("manga/", "")
             img_tag = komik.find("img", class_="ts-post-image")
             img_url = img_tag["src"] if img_tag and "src" in img_tag.attrs else "null"
             title_tag = komik.find("div", class_="tt")
@@ -166,12 +166,12 @@ def detail(link):
     if chap_list_container:
         chap_li = chap_list_container.find_all("li")
         for chapter in chap_li:
-            link = chapter.find("a")
+            linkch = chapter.find("a")
             chap = chapter.find("span", class_="chapternum").text.strip()
             update = chapter.find("span", class_="chapterdate").text.strip()
 
             chapter_list.append({
-                "link": urlparse(link["href"]).path.strip("/") if link else "",
+                "link": urlparse(linkch["href"]).path.strip("/") if linkch else "",
                 "chapter": chap,
                 "update": update
             })
@@ -198,8 +198,9 @@ def detail(link):
         "related": related,
         "chapter_list": chapter_list
     }
+    print(data_list)
     return data_list
-
+detail("lookism")
 def get_daftar_chapter(link):
     base_url = f"{BASE_URL}manga/{link}"
     res = requests.get(base_url, headers=headers)
