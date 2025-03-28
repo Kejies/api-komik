@@ -101,12 +101,12 @@ def detail(link):
     img = img_container.find("img", itemprop="image")["src"] if img_container and img_container.find("img", itemprop="image") else ""
 
     # Rating
-    ratting = komik_detail.find("i", itemprop="ratingValue")
+    ratting = komik_detail.find("div", itemprop="ratingValue")
     ratting = ratting.text.strip() if ratting else ""
 
     # Informasi tambahan
     info_container = komik_detail.find("div", class_="tsinfo bixbox")
-    status = author = artist = type = realeased = ""
+    status = author = artist = typeKomik = realeased = ""
     if info_container:
         divs = info_container.find_all("div", class_="imptdt")
 
@@ -118,7 +118,7 @@ def detail(link):
             if "status" in key:
                 status = value
             elif "type" in key:
-                type = value
+                typeKomik = div.find("a").text.strip() if div.find("a") else ""
             elif "released" in key:
                 realeased = value
             elif "author" in key:
@@ -190,7 +190,7 @@ def detail(link):
         "status": status,
         "author": author,
         "artist": artist,
-        "type": type,
+        "type": typeKomik,
         "genre": genre,
         "sinopsis": sinopsis,
         "related": related,
