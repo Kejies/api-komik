@@ -82,10 +82,9 @@ def api_genre(genre, page):
     
     return Response(json.dumps(data, ensure_ascii=False, indent=4), mimetype="application/json")
 
-@api_routes.route('/api/manhua/',defaults={'page': 1}, methods=['GET'])
-@api_routes.route('/api/manhua/page/<int:page>', methods=['GET'])
-def api_get_manhua(page):
-    komik_data, total_pages = get_manhua_list(page)
+@api_routes.route('/api/manhua/', methods=['GET'])
+def api_get_manhua(page=1):
+    komik_data, total_pages = get_manhua_list()
 
     data = {
         "success": True,
