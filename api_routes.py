@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, Response
 import json
-from scraper import terbaru, popular, detail, content, search, find_genre, get_manhua_list, get_search_manhua
+from scraper import terbaru, popular, detail, content, search, find_genre, get_manhua_list, get_search_manhua, get_manhua_detail, get_manhua_content
 
 api_routes = Blueprint("api_routes", __name__)
 
@@ -32,24 +32,46 @@ def api_popular():
 
 @api_routes.route('/api/detail/<path:link>', methods=['GET'])
 def api_detail(link):
-    komik_data = detail(link)
+    try:
+        komik_data = content(link)
+    except Exception as e:
+        komik_data = None
+        print(f"[ERROR] content() gagal: {e}")
 
+    # Jika gagal atau hasil None, coba find_manhua
+    if not komik_data:
+        try:
+            komik_data = get_manhua_detail(link)
+        except Exception as e:
+            komik_data = None
+            print(f"[ERROR] find_manhua() gagal: {e}")
     data = {
         "success": True,
-        "message": "Berhasil mengambil data",
-        "data": komik_data
+        "message": "Berhasil mengambil data" if komik_data else "Gagal mengambil data",
+        "data": komik_data if komik_data else None
     }
     
     return Response(json.dumps(data, ensure_ascii=False, indent=4), mimetype="application/json")
 
 @api_routes.route('/api/content/<path:link>', methods=['GET'])
 def api_content(link):
-    komik_data = content(link)
+    try:
+        komik_data = content(link)
+    except Exception as e:
+        komik_data = None
+        print(f"[ERROR] content() gagal: {e}")
 
+    # Jika gagal atau hasil None, coba find_manhua
+    if not komik_data:
+        try:
+            komik_data = get_manhua_content(link)
+        except Exception as e:
+            komik_data = None
+            print(f"[ERROR] find_manhua() gagal: {e}")
     data = {
-        "success": True,
-        "message": "Berhasil mengambil data",
-        "data": komik_data
+        "success": bool(komik_data),
+        "message": "Berhasil mengambil data" if komik_data else "Gagal mengambil data",
+        "data": komik_data if komik_data else None
     }
     
     return Response(json.dumps(data, ensure_ascii=False, indent=4), mimetype="application/json")
