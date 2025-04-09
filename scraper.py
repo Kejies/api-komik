@@ -382,6 +382,35 @@ def get_search_manhua(query):
         print(komik_list)
     return komik_list
 
+def get_search_manga(query):
+    search_url = f"{komikIndoLink}daftar-manga/?status=&type=Manga&format=&order=&title={query.replace(' ', '+')}"
+    response = requests.get(search_url, headers=headers)
+    soup = BeautifulSoup(response.text, "html.parser")
+    main = soup.find("div", class_="listupd")
+    main_post = main.find_all("div", class_="animepost")
+
+    komik_list = []
+
+    for komik in main_post:
+        link = komik.find("a")["href"]
+        parsed_link = urlparse(link).path.strip("/").replace("komik/", "")
+        img_tag = komik.find("img", itemprop="image")
+        img_url = img_tag["src"] if img_tag and "src" in img_tag.attrs else "null"
+        title_tag = komik.find("div", class_="tt").find("h4")
+        title = title_tag.text.strip() if title_tag else "Tidak Ada Judul"
+        tipe = komik.find("span", class_="typeflag")["class"][1]
+        warna = komik.find("div", class_="warnalabel").text.strip() if komik.find("div", class_="warnalabel") else ""
+
+        komik_list.append({
+            "link": parsed_link,
+            "title": title,
+            "colored": warna,
+            "type": tipe,
+            "img": img_url
+        })
+        print(komik_list)
+    return komik_list
+
 planLink = "https://komikindo.cz"
 res = requests.get(planLink, headers=headers)
 soup = BeautifulSoup(res.content, "html.parser")
