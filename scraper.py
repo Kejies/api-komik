@@ -386,6 +386,7 @@ planLink = "https://komikindo.cz"
 res = requests.get(planLink, headers=headers)
 soup = BeautifulSoup(res.content, "html.parser")
 komikIndoLink = soup.find("a", class_="elementskit-btn")["href"]
+
 def get_manhua_list():
     base_url = f"{komikIndoLink}manhua/"
     res = requests.get(base_url, headers=headers)
@@ -434,7 +435,55 @@ def get_manhua_list():
 
     return data_list, total_pages
 
-def get_manhua_detail(link):
+def get_manga_list():
+    base_url = f"{komikIndoLink}manga/"
+    res = requests.get(base_url, headers=headers)
+    soup = BeautifulSoup(res.content, "html.parser")
+    komik_container = soup.find("div", class_="postbody")
+    komik_list = komik_container.find_all("div", class_="animepost")
+
+    data_list = []
+    for komik in komik_list:
+        link = komik.find("a")["href"]
+        parsed_link = urlparse(link).path.strip("/").replace("komik/", "")
+        img_tag = komik.find("img", itemprop="image")
+        img_url = img_tag["src"] if img_tag and "src" in img_tag.attrs else "null"
+        title_tag = komik.find("div", class_="tt").find("h4")
+        title = title_tag.text.strip() if title_tag else ""
+        chapter = komik.find("a", itemprop="url").text.strip()
+        chapter = " ".join(chapter.split())
+        tipe = komik.find("span", class_="typeflag")["class"][1] if komik.find("span", class_="typeflag") else ""
+        warna = komik.find("div", class_="warnalabel").text.strip() if komik.find("div", class_="warnalabel") else ""
+        last_update = komik.find("span", class_="datech").text.strip()
+
+        data_list.append({
+            "link": parsed_link,
+            "title": title,
+            "colored": warna,
+            "type": tipe,
+            "chapter": chapter,
+            "last_update": last_update,
+            "img": img_url
+        })
+
+    pagination = soup.find("div", class_="pagination")
+
+    if pagination:
+        page_numbers = [a.text.strip() for a in pagination.find_all("a", class_="page-numbers") if a.text.strip().isdigit()]
+        
+        total_pages = int(max(page_numbers)) if page_numbers else 1
+    else:
+        total_pages = 1
+
+    current_page_elem = soup.find("span", class_="page-numbers current")
+    current_page = int(current_page_elem.text.strip()) if current_page_elem else 1
+
+    if current_page >= total_pages:
+        total_pages = current_page
+
+    return data_list, total_pages
+
+def get_manga_manhua_detail(link):
      base_url = f"{komikIndoLink}komik/{link}"
      res = requests.get(base_url, headers=headers)
      soup = BeautifulSoup(res.content, "html.parser")
@@ -577,7 +626,7 @@ def get_manhua_detail(link):
      }
      return data_list
  
-def get_manhua_content(link):
+def get_manga_manhua_content(link):
      base_url = f"{komikIndoLink}{link}"
      res = requests.get(base_url, headers=headers)
      soup = BeautifulSoup(res.content, "html.parser")
