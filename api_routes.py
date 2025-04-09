@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, Response
 import json
-from scraper import terbaru, popular, detail, content, search, find_genre, get_manhua_list, get_search_manhua, get_manhua_detail, get_manhua_content
+from scraper import terbaru, popular, detail, content, search, find_genre, get_manhua_list, get_search_manhua, get_manga_manhua_detail, get_manga_manhua_content, get_manga_list
 
 api_routes = Blueprint("api_routes", __name__)
 
@@ -38,10 +38,9 @@ def api_detail(link):
         komik_data = None
         print(f"[ERROR] content() gagal: {e}")
 
-    # Jika gagal atau hasil None, coba find_manhua
     if not komik_data:
         try:
-            komik_data = get_manhua_detail(link)
+            komik_data = get_manga_manhua_detail(link)
         except Exception as e:
             komik_data = None
             print(f"[ERROR] find_manhua() gagal: {e}")
@@ -61,10 +60,9 @@ def api_content(link):
         komik_data = None
         print(f"[ERROR] content() gagal: {e}")
 
-    # Jika gagal atau hasil None, coba find_manhua
     if not komik_data:
         try:
-            komik_data = get_manhua_content(link)
+            komik_data = get_manga_manhua_content(link)
         except Exception as e:
             komik_data = None
             print(f"[ERROR] find_manhua() gagal: {e}")
@@ -75,6 +73,7 @@ def api_content(link):
     }
     
     return Response(json.dumps(data, ensure_ascii=False, indent=4), mimetype="application/json")
+
 
 @api_routes.route('/api/search/<path:query>', methods=['GET'])
 def api_search(query):
@@ -107,6 +106,19 @@ def api_genre(genre, page):
 @api_routes.route('/api/manhua/', methods=['GET'])
 def api_get_manhua(page=1):
     komik_data, total_pages = get_manhua_list()
+
+    data = {
+        "success": True,
+        "message": "Berhasil mengambil data",
+        "current_page": str(page),
+        "total_pages": str(total_pages),
+        "data": komik_data 
+    }
+    return Response(json.dumps(data, ensure_ascii=False, indent=4), mimetype="application/json")
+
+@api_routes.route('/api/manga/', methods=['GET'])
+def api_get_manga(page=1):
+    komik_data, total_pages = get_manga_list()
 
     data = {
         "success": True,
