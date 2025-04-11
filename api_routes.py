@@ -33,7 +33,7 @@ def api_popular():
 @api_routes.route('/api/detail/<path:link>', methods=['GET'])
 def api_detail(link):
     try:
-        komik_data = content(link)
+        komik_data = detail(link)
     except Exception as e:
         komik_data = None
         print(f"[ERROR] content() gagal: {e}")
