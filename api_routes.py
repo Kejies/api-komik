@@ -33,14 +33,15 @@ def api_popular():
 @api_routes.route('/api/detail/<path:link>', methods=['GET'])
 def api_detail(link):
     try:
-        komik_data = detail(link)
+        komik_data = content(link)
     except Exception as e:
         komik_data = None
         print(f"[ERROR] content() gagal: {e}")
 
+    # Jika gagal atau hasil None, coba find_manhua
     if not komik_data:
         try:
-            komik_data = get_manga_manhua_detail(link)
+            komik_data = get_manhua_detail(link)
         except Exception as e:
             komik_data = None
             print(f"[ERROR] find_manhua() gagal: {e}")
