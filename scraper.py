@@ -512,8 +512,8 @@ def filter_duplicates(main, to_filter):
     return [komik for komik in to_filter if komik['title'].lower() not in existing_titles]
 
 def search_all_sources(query):
-    manhwa_results = search_manhwaxyz(query)  # hanya manhwa
-    kiryu_results = search_kiryu(query)       # tanpa manhwa
+    manhwa_results = search(query)  # hanya manhwa
+    kiryu_results = search_manga_manhua(query)       # tanpa manhwa
 
     kiryu_filtered = filter_duplicates(manhwa_results, kiryu_results)
 
