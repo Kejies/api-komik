@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, Response
 import json
 from scraper import terbaru, popular, detail, content, search_all_sources, search_manga_manhua, find_genre, get_manhua_list, get_manga_manhua_detail, get_manga_manhua_content, get_manga_list
-
+from scraper2 import anime_terbaru, anime_detail, anime_content
 api_routes = Blueprint("api_routes", __name__)
 
 @api_routes.route('/api/terbaru/<int:page>', methods=['GET'])
@@ -126,4 +126,43 @@ def api_get_manga(page=1):
         "total_pages": str(total_pages),
         "data": komik_data 
     }
+    return Response(json.dumps(data, ensure_ascii=False, indent=4), mimetype="application/json")
+
+
+@api_routes.route('/api/anime-terbaru/<int:page>', methods=['GET'])
+def api_anime_terbaru(page):
+    anime_data = anime_terbaru(page)
+
+    data = {
+        "success": True,
+        "message": "Berhasil mengambil data",
+        "current_page": str(page),
+        "total_pages": str(25),
+        "data": anime_data 
+    }
+    
+    return Response(jsonify(data).data, mimetype="application/json")
+
+@api_routes.route('/api/anime-detail/<path:link>', methods=['GET'])
+def api_anime_detail(link):
+    anime_data = anime_detail(link)
+
+    data = {
+        "success": True,
+        "message": "Berhasil mengambil data",
+        "data": anime_data
+    }
+    
+    return Response(json.dumps(data, ensure_ascii=False, indent=4), mimetype="application/json")
+
+@api_routes.route('/api/nontonanime/<path:link>', methods=['GET'])
+def api_nonton_anime(link):
+    anime_data = anime_content(link)
+
+    data = {
+        "success": True,
+        "message": "Berhasil mengambil data",
+        "data": anime_data
+    }
+    
     return Response(json.dumps(data, ensure_ascii=False, indent=4), mimetype="application/json")
