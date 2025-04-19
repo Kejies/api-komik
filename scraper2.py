@@ -299,7 +299,7 @@ def anime_search_base(query):
             desc = desc_tag.get_text(strip=True) if desc_tag else ""
 
             results.append({
-                "link": urlparse(link).path.strip("/"),
+                "link": urlparse(link).path.strip("/anime"),
                 "img": img,
                 "labels": labels,
                 "desc": desc
