@@ -178,7 +178,7 @@ def anime_content(link):
     res = requests.get(base_url, headers=headers)
     soup = BeautifulSoup(res.content, "html.parser")
     main = soup.find("div", class_="postbody")
-    title_tag = main.find("h1", class_="entry-title", itemprop="name")
+    title_tag = main.find("h1", class_="entry-title")
     title = title_tag.text.strip()
     container = main.find("div", class_="player-embed")
     source_tag = container.find("iframe")
