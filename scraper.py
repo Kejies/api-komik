@@ -2,7 +2,6 @@ import requests
 import re
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
-import unicodedata
 
 BASE_URL = "https://manhwalist.xyz/"
 headers = {
@@ -370,8 +369,38 @@ def find_genre(genre, page=1):
     return data_list, total_pages
 
 kiryu = "https://kiryuu01.com/"
+def search_manga_manhua(query):
+    search_url = f"{kiryu}?s={query.replace(' ', '+')}"
+    response = requests.get(search_url, headers=headers)
+    soup = BeautifulSoup(response.text, "html.parser")
+    komik_container = soup.find("div", class_="listupd")
+    komik_list = komik_container.find_all("div", class_="bs")
+
+    data_list = []
+    for komik in komik_list:
+        link = komik.find("a")["href"]
+        parsed_link = urlparse(link).path.strip("/").replace("manga/", "")
+        img_tag = komik.find("img", class_="ts-post-image")
+        img_url = img_tag["src"] if img_tag and "src" in img_tag.attrs else "null"
+        title_tag = komik.find("div", class_="tt")
+        title = title_tag.text.strip() if title_tag else "Tidak Ada Judul"
+        chapterCont = komik.find("div", class_="adds")
+        chapter = chapterCont.find("div", class_="epxs").text.strip()
+        tipe = komik.find("span", class_="type")["class"][1]
+        warna = komik.find("span", class_="colored").text.strip() if komik.find("span", class_="colored") else ""
+        ratting = komik.find("div", class_="numscore").text
 
 
+        data_list.append({
+            "link": parsed_link,
+            "title": title,
+            "ratting": ratting,
+            "colored": warna,
+            "type": tipe,
+            "chapter": chapter,
+            "img": img_url
+        })
+    return data_list
 
 
 def get_manhua_list(page=1):
@@ -474,47 +503,19 @@ def get_manga_list(page=1):
 
     return data_list, total_pages
 
-def normalize(text):
-    return unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode().lower()
+def filter_duplicates(kiryu_results, manhwa_results):
+    manhwa_titles = {komik['title'].lower() for komik in manhwa_results}
+    filtered_kiryu = [komik for komik in kiryu_results if komik['title'].lower() not in manhwa_titles]
+    return filtered_kiryu
 
-def search_manga_manhua_by_title(keyword, page=1):
-    results = []
-
-    # Ambil list manga & manhua dari halaman tertentu
-    manhua_list, _ = get_manhua_list(page)
-    manga_list, _ = get_manga_list(page)
-
-    # Gabungkan
-    data_list = manhua_list + manga_list
-
-    keyword_norm = normalize(keyword)
-    for data in data_list:
-        title_norm = normalize(data['title'])
-
-        # Cocokkan judul yang telah dinormalisasi
-        if keyword_norm in title_norm:
-            results.append(data)
-
-    # Urutkan hasil berdasarkan exact match
-    results.sort(key=lambda x: 0 if normalize(x['title']) == keyword_norm else 1)
-
-    return results
-
-def get_search_manhua_manga(keyword, max_pages=100):
-    all_results = []
-    seen_titles = set()  # Untuk menghindari duplikat
-
-    for page in range(1, max_pages + 1):
-        print(f"[INFO] Checking page {page}")
-        results = search_manga_manhua_by_title(keyword, page)
-
-        for result in results:
-            if result['title'] not in seen_titles:
-                all_results.append(result)
-                seen_titles.add(result['title'])
-
-    print(f"[INFO] Total found: {len(all_results)}")
-    return all_results
+def search_all_sources(query):
+    manhwa_results = search(query)
+    manga_manhua_results = search_manga_manhua(query)
+    
+    filtered_result = filter_duplicates(manhwa_results, manga_manhua_results)
+    
+    # Gabungkan hasil
+    return manhwa_results + filtered_result
 
 def get_manga_manhua_detail(link):
     base_url = f"{kiryu}manga/{link}"
