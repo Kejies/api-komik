@@ -156,6 +156,7 @@ def anime_detail(link):
             if a:
                 ep_num = a.find("div", class_="epl-num").text.strip() if a.find("div", class_="epl-num") else ""
                 ep_title = a.find("div", class_="epl-title").text.strip() if a.find("div", class_="epl-title") else ""
+                ep_update = a.find("div", class_="epl-date").text.strip() if a.find("div", class_="epl-date") else ""
                 ep_link = a["href"]
 
                 matched_slug = normalize_ep_link_to_match_anime_link(link, ep_link)
@@ -164,7 +165,8 @@ def anime_detail(link):
                     episode.append({
                         "episode": ep_num,
                         "title": ep_title,
-                        "link": matched_slug
+                        "link": matched_slug,
+                        "epsupdate": ep_update
                     })
 
 
