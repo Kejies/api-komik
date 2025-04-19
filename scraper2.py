@@ -172,6 +172,11 @@ def anime_detail(link):
         "episodeList": episode,
         "relatedAnime": related
     }
+def parse_path(url, replace=None):
+    if not url:
+        return None
+    path = urlparse(url).path.strip()
+    return path.replace(replace, "") if replace else path
 
 def anime_content(link):
     base_url = f"{base_url2}/{link}/"
@@ -199,9 +204,9 @@ def anime_content(link):
     return {
         'title': title,
         'video_url': source,
-        'episode_prev': urlparse(prevBTN).path.strip(),
-        'episode_next': urlparse(nextBTN).path.strip(),
-        'eps_list': urlparse(daftarEPS).path.replace("/anime", "")
+        'episode_prev': parse_path(prevBTN),
+        'episode_next': parse_path(nextBTN),
+        'eps_list': parse_path(daftarEPS, replace="/anime")
     }
 
 
