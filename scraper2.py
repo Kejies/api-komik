@@ -338,10 +338,10 @@ def anime_search(query):
     return results
 
 def bandingkan_search(query):
-    search1 = anime_search(query)
-    search2 = anime_search_base(query)
+    search1 = anime_search(query)           # hasil dari search terbaru
+    search2 = anime_search_base(query)      # hasil dari menu lama
 
-    # Buat peta link dari base sebagai referensi yang valid
+    # Map normalized slug dari base
     base_map = {
         normalize_anime_url(item["link"]): item
         for item in search2
@@ -353,13 +353,13 @@ def bandingkan_search(query):
         ori_link = item["link"]
         normalized = normalize_anime_url(ori_link)
 
-        # Cek apakah match langsung
         if normalized in base_map:
+            # Match langsung
             item["link"] = base_map[normalized]["link"]
             hasil.append(item)
 
         else:
-            # Coba fallback slug ke ordinal
+            # Coba fallback slug
             fallback_slug = convert_to_ordinal_slug(normalized)
             if fallback_slug in base_map:
                 item["link"] = base_map[fallback_slug]["link"]
@@ -367,13 +367,18 @@ def bandingkan_search(query):
 
     return hasil
 
+
 def anime_search_fix(query):
     hasil_final = bandingkan_search(query)
+    
+    data = []
     for h in hasil_final:
-        return{
+        data.append({
             "link": h["link"],
             "img": h["img"],
             "type": h["type"],
             "epx": h["epx"],
             "title": h["title"]
-        }
+        })
+
+    return data
