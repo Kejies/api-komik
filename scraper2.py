@@ -135,7 +135,13 @@ def anime_detail(link):
 
     # Genre
     genre_container = main.find("div", class_="genxed")
-    genre = [a.text.strip() for a in genre_container.find_all("a")] if genre_container else []
+    genre = []
+    if genre_container:
+        for a in genre_container.find_all("a"):
+            genre.append({
+                "title": a.text.strip(),
+                "link": urlparse(a["href"]).path.strip("/")  # atau a["href"] langsung kalau sudah rapi
+            })
 
     # Title + Sinopsis
     title_sinopsis = main.find("div", class_="releases").text.strip() if main.find("div", class_="releases") else ""
