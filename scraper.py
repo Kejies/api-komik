@@ -504,8 +504,8 @@ def get_manga_list(page=1):
     return data_list, total_pages
 
 def filter_duplicates(kiryu_results, manhwa_results):
-    manhwa_titles = {komik['title'].lower() for komik in manhwa_results}
-    filtered_kiryu = [komik for komik in kiryu_results if komik['title'].lower() not in manhwa_titles]
+    manhwa_titles = {komik['link'].lower() for komik in manhwa_results}
+    filtered_kiryu = [komik for komik in kiryu_results if komik['link'] not in manhwa_titles]
     return filtered_kiryu
 
 def search_all_sources(query):

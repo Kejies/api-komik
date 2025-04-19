@@ -77,7 +77,7 @@ def api_content(link):
 
 @api_routes.route('/api/search/<path:query>', methods=['GET'])
 def api_search(query):
-    komik_data = search_manga_manhua(query)
+    komik_data = search_all_sources(query)
 
     data = {
         "success": True,
