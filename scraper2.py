@@ -230,6 +230,10 @@ def anime_content(link):
 
     if pag:
         pag_a = pag.find_all("a")
+        episode_prev = None
+        episode_next = None
+        eps_list = None
+
         for a in pag_a:
             title_pag = a.text.strip()
 
@@ -239,16 +243,18 @@ def anime_content(link):
             link_pag_tag = a["href"]
             link_pag = link_pag_tag.replace("/anime", "/")
 
-            if "Next" in title_pag:
-                last_link = link_pag
-
-            pagin.append({
-                "title": title_pag,
-                "link": link_pag
-            })
+            if "Prev" in title_pag:
+                episode_prev = link_pag
+            elif "Next" in title_pag:
+                episode_next = link_pag
+            elif "Semua Episode" in title_pag:
+                eps_list = link_pag
 
     return {
         'title': title,
         'video_url': f'{BASE_URL}{source}',
-        'episodeFL': pagin
+        'episode_prev': episode_prev,
+        'episode_next': episode_next,
+        'eps_list': eps_list
     }
+
