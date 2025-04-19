@@ -10,104 +10,45 @@ headers = {
 }
 
 def anime_terbaru(page=1):
-    base_url = f"{BASE_URL}/page/{page}/"
+    base_url = f"{base_url2}/page/{page}/"
     res = requests.get(base_url, headers=headers)
     soup = BeautifulSoup(res.content, "html.parser")
-    anime_container = soup.find("div", class_="menu")
-    anime_list = anime_container.find_all("a")
+
+    anime_container = soup.find_all("div", class_="listupd")[1]
+    articles = anime_container.find_all("article", class_="bs")
+    
     data_list = []
 
-    for anime in anime_list:
-        link = anime["href"]
-        parsed_link = urlparse(link).path.strip("/").replace("manga/", "")
-        img_tag = anime.find("img")
+    for article in articles:
+        link_tag = article.find("a", href=True)
+        img_tag = article.find("img", src=True)
+        type_tag = article.find("div", class_="typez")
+        epx_tag = article.find("span", class_="epx")
+        title_tag = article.find("h2", itemprop="headline")
 
-        # Ambil data-original jika ada
-        if img_tag:
-            img_url = img_tag.get("data-original") or img_tag.get("src", "null")
-        else:
-            img_url = "null"
-
-        title_tag = anime.find("p")
-        title = title_tag.text.strip() if title_tag else "Tidak Ada Judul"
-
-        eps_tag = anime.find("span", class_="eps")
-        eps = eps_tag.text.strip() if eps_tag else ""
+        link = link_tag["href"] if link_tag else ""
+        img = img_tag["src"] if img_tag else ""
+        typex = type_tag.get_text(strip=True) if type_tag else ""
+        epx = epx_tag.get_text(strip=True) if epx_tag else ""
+        title = title_tag.get_text(strip=True) if title_tag else ""
 
         data_list.append({
-            "link": parsed_link,
-            "title": title,
-            "episode": eps,
-            "img": img_url
+            "link": link,
+            "img": img,
+            "type": typex,
+            "epx": epx,
+            "title": title
         })
 
-    pagination = soup.find("div", class_="pag")
-
-    if pagination:
-        page_elements = pagination.find_all(["a", "span"])
-
-        page_numbers = [
-            int(el.text.strip()) for el in page_elements
-            if el.text.strip().isdigit()
-        ]
-
-        total_pages = max(page_numbers) if page_numbers else 1
-    else:
-        total_pages = 1
+    total_pages = 85
 
     return data_list, total_pages
 
 def anime_popular():
     pass
 
-def normalize_anime_url(url: str) -> str:
-    path = urlparse(url).path.strip("/").lower()
-
-    # Ganti 2nd-season, second-season, etc jadi season-2
-    path = re.sub(r"\b(2nd|second)\b[- ]season", "season-2", path)
-    path = re.sub(r"\b(3rd|third)\b[- ]season", "season-3", path)
-    path = re.sub(r"\b(1st|first)\b[- ]season", "season-1", path)
-    
-    path = path.rstrip("/")
-
-    return path
-def convert_to_ordinal_slug(slug: str) -> str:
-    match = re.search(r"(.*)-season-(\d+)$", slug)
-    if not match:
-        return slug 
-
-    base, season = match.groups()
-    season_int = int(season)
-
-    # Map angka ke ordinal
-    if season_int == 1:
-        ordinal = "1st"
-    elif season_int == 2:
-        ordinal = "2nd"
-    elif season_int == 3:
-        ordinal = "3rd"
-    else:
-        ordinal = f"{season_int}th"
-
-    return f"{base}-{ordinal}-season"
-def normalize_ep_link_to_match_anime_link(link: str, ep_link: str) -> str:
-    ep_path = urlparse(ep_link).path.strip("/")
-    match = re.search(r"(episode-\d+)$", ep_path.lower())
-    if not match:
-        return None
-    
-    episode_part = match.group(1)
-    ep_base_slug = re.sub(r"-episode-\d+$", "", ep_path.lower())
-    normalized_link = normalize_anime_url(link)
-    normalized_ep = normalize_anime_url(ep_base_slug)
-
-    if normalized_link == normalized_ep:
-        return f"{normalized_link}/{episode_part}"
-    
-    return None
-
 def anime_detail(link):
-    base_url = f"{base_url2}/anime/{normalize_anime_url(link)}/"
+    base_url = f"{base_url2}/anime/{link}/"
     res = requests.get(base_url, headers=headers)
     soup = BeautifulSoup(res.content, "html.parser")
     main = soup.find("div", class_="postbody")
@@ -171,15 +112,12 @@ def anime_detail(link):
                 ep_update = a.find("div", class_="epl-date").text.strip() if a.find("div", class_="epl-date") else ""
                 ep_link = a["href"]
 
-                matched_slug = normalize_ep_link_to_match_anime_link(link, ep_link)
-
-                if matched_slug:
-                    episode.append({
-                        "episode": ep_num,
-                        "title": ep_title,
-                        "link": matched_slug,
-                        "epsupdate": ep_update
-                    })
+                episode.append({
+                    "episode": ep_num,
+                    "title": ep_title,
+                    "link": ep_link,
+                    "epsupdate": ep_update
+                })
 
     episodeFL = {}
     lastend_container = main.find("div", class_="lastend")
@@ -236,76 +174,28 @@ def anime_detail(link):
     }
 
 def anime_content(link):
-    base_url = f"{BASE_URL}/{link}/"
+    base_url = f"{base_url2}/{link}/"
     res = requests.get(base_url, headers=headers)
     soup = BeautifulSoup(res.content, "html.parser")
-    main = soup.find("div", class_="ngiri")
-    title_tag = main.find("h1", class_="title")
+    main = soup.find("div", class_="postbody")
+    title_tag = main.find("h1", class_="entry-title", itemprop="name")
     title = title_tag.text.strip()
-    source_tag = soup.find("a", class_="server")
-    source = source_tag['data-video']
-    pag = main.find("div", class_="navi")
-    pagin = []
-
+    container = main.find("div", class_="player-embed")
+    source_tag = container.find("iframe")
+    source = source_tag['src']
+    pag = main.find("div", class_="naveps")
     if pag:
-        pag_a = pag.find_all("a")
-        episode_prev = None
-        episode_next = None
-        eps_list = None
-
-        for a in pag_a:
-            title_pag = a.text.strip()
-
-            if "Download Mp4" in title_pag:
-                continue
-
-            link_pag_tag = a["href"]
-            link_pag = link_pag_tag.replace("/anime", "/")
-
-            if "Prev" in title_pag:
-                episode_prev = link_pag
-            elif "Next" in title_pag:
-                episode_next = link_pag
-            elif "Semua Episode" in title_pag:
-                eps_list = link_pag
+        prevBTN = pag.find("a", rel="prev")
+        daftarEPS = pag.find("div", class_="nvsc").find("a")
+        nextBTN = pag.find("a", rel="next")
 
     return {
         'title': title,
-        'video_url': f'{BASE_URL}{source}',
-        'episode_prev': episode_prev,
-        'episode_next': episode_next,
-        'eps_list': eps_list
+        'video_url': source,
+        'episode_prev': prevBTN,
+        'episode_next': nextBTN,
+        'eps_list': daftarEPS
     }
-
-def anime_search_base(query):
-    base_url = f"{BASE_URL}/search/{query}/"
-    res = requests.get(base_url, headers=headers)
-    soup = BeautifulSoup(res.content, "html.parser")
-    main = soup.find("div", class_="menu")
-    
-    results = []
-
-    if main:
-        tables = main.find_all("table", class_="otable")
-        for table in tables:
-            link_tag = table.find("a", href=True)
-            img_tag = table.find("img", src=True)
-            label_tags = table.find_all("span", class_="label")
-            desc_tag = table.find("p", class_="des")
-
-            link = link_tag["href"] if link_tag else ""
-            img = img_tag["src"] if img_tag else ""
-            labels = [label.get_text(strip=True) for label in label_tags]
-            desc = desc_tag.get_text(strip=True) if desc_tag else ""
-
-            results.append({
-                "link": urlparse(link).path.replace("/anime", ""),
-                "img": img,
-                "labels": labels,
-                "desc": desc
-            })
-
-    return results
 
 def anime_search(query):
     base_url = f"{base_url2}?s={query}"
@@ -336,46 +226,3 @@ def anime_search(query):
         })
 
     return results
-
-def bandingkan_search(query):
-    search1 = anime_search(query)         
-    search2 = anime_search_base(query)      
-
-    base_map = {
-        normalize_anime_url(item["link"]): item
-        for item in search2
-    }
-
-    hasil = []
-
-    for item in search1:
-        ori_link = item["link"]
-        normalized = normalize_anime_url(ori_link)
-
-        if normalized in base_map:
-            item["link"] = base_map[normalized]["link"]
-            hasil.append(item)
-
-        else:
-            fallback_slug = convert_to_ordinal_slug(normalized)
-            if fallback_slug in base_map:
-                item["link"] = base_map[fallback_slug]["link"]
-                hasil.append(item)
-
-    return hasil
-
-
-def anime_search_fix(query):
-    hasil_final = bandingkan_search(query)
-
-    return [
-        {
-            "link": h["link"],
-            "img": h["img"],
-            "type": h["type"],
-            "epx": h["epx"],
-            "title": h["title"]
-        }
-        for h in hasil_final
-    ]
-
