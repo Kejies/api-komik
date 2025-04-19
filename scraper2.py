@@ -277,6 +277,36 @@ def anime_content(link):
         'eps_list': eps_list
     }
 
+def anime_search_base(query):
+    base_url = f"{BASE_URL}/search/{query}/"
+    res = requests.get(base_url, headers=headers)
+    soup = BeautifulSoup(res.content, "html.parser")
+    main = soup.find("div", class_="menu")
+    
+    results = []
+
+    if main:
+        tables = main.find_all("table", class_="otable")
+        for table in tables:
+            link_tag = table.find("a", href=True)
+            img_tag = table.find("img", src=True)
+            label_tags = table.find_all("span", class_="label")
+            desc_tag = table.find("p", class_="des")
+
+            link = link_tag["href"] if link_tag else ""
+            img = img_tag["src"] if img_tag else ""
+            labels = [label.get_text(strip=True) for label in label_tags]
+            desc = desc_tag.get_text(strip=True) if desc_tag else ""
+
+            results.append({
+                "link": urlparse(link).path.strip("/"),
+                "img": img,
+                "labels": labels,
+                "desc": desc
+            })
+
+    return results
+
 def anime_search(query):
     base_url = f"{base_url2}?s={query}"
     res = requests.get(base_url, headers=headers)
@@ -306,3 +336,40 @@ def anime_search(query):
         })
 
     return results
+
+def anime_search_fix(query):
+    search1 = anime_search(query)
+    search2 = anime_search_base(query)
+
+    base_map = {
+        normalize_anime_url(item["link"]): item
+        for item in search2
+    }
+
+    for item in search1:
+        ori_link = item["link"]
+        normalized = normalize_anime_url(ori_link)
+
+        if normalized in base_map:
+            item["link"] = base_map[normalized]["link"]
+            return {
+                "link": item["link"],
+                "img": item["img"],
+                "type": item["type"],
+                "epx": item["epx"],
+                "title": item["title"]
+            }
+
+        else:
+            fallback_slug = convert_to_ordinal_slug(normalized)
+            if fallback_slug in base_map:
+                item["link"] = base_map[fallback_slug]["link"]
+                return {
+                    "link": item["link"],
+                    "img": item["img"],
+                    "type": item["type"],
+                    "epx": item["epx"],
+                    "title": item["title"]
+                }
+
+    return None
