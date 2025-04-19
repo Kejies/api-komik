@@ -299,7 +299,7 @@ def anime_search_base(query):
             desc = desc_tag.get_text(strip=True) if desc_tag else ""
 
             results.append({
-                "link": urlparse(link).path.replace("/anime", "/"),
+                "link": urlparse(link).path.replace("/anime", ""),
                 "img": img,
                 "labels": labels,
                 "desc": desc
@@ -328,7 +328,7 @@ def anime_search(query):
         title = title_tag.get_text(strip=True) if title_tag else ""
 
         results.append({
-            "link": urlparse(link).path.replace("/anime", "/"),
+            "link": urlparse(link).path.replace("/anime", ""),
             "img": img,
             "type": typex,
             "epx": epx,
