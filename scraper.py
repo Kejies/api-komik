@@ -505,13 +505,6 @@ def get_manga_manhua_detail(link):
     # Judul
     dirty_title = komik_detail.find("h1", class_="entry-title", itemprop="name")
     title = re.sub(r'\s+', ' ', dirty_title.text.strip()) if dirty_title else ""
- 
-    inepcx_blocks = soup.select('.lastend .inepcx a')
-
-    first_chapter = inepcx_blocks[0]['href'] if len(inepcx_blocks) > 0 else None
-    title_first_chapter = inepcx_blocks[0].find("span", class_="epcurfirst").text.strip()
-    last_chapter = inepcx_blocks[-1]['href'] if len(inepcx_blocks) > 1 else None
-    title_last_chapter = inepcx_blocks[-1].find("span", class_="epcurlast").text.strip()
 
     # Gambar
     img_container = komik_detail.find("div", class_="thumb", itemprop="image")
@@ -561,7 +554,7 @@ def get_manga_manhua_detail(link):
         img_tag = komik.find("img", class_="ts-post-image")
         img_url = img_tag["src"] if img_tag and "src" in img_tag.attrs else "null"
         title_tag = komik.find("div", class_="tt")
-        title = title_tag.text.strip() if title_tag else "Tidak Ada Judul"
+        titlerel = title_tag.text.strip() if title_tag else "Tidak Ada Judul"
         chapterCont = komik.find("div", class_="adds")
         chapter = chapterCont.find("div", class_="epxs").text.strip()
         tipe = komik.find("span", class_="type")["class"][1]
@@ -571,7 +564,7 @@ def get_manga_manhua_detail(link):
 
         related.append({
             "link": parsed_link,
-            "title": title,
+            "title": titlerel,
             "ratting": ratting,
             "colored": warna,
             "type": tipe,
