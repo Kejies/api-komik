@@ -317,7 +317,7 @@ def anime_search(query):
     for article in articles:
         link_tag = article.find("a", href=True)
         img_tag = article.find("img", src=True)
-        type_tag = article.find("div", class_="typex")
+        type_tag = article.find("div", class_="typez")
         epx_tag = article.find("span", class_="epx")
         title_tag = article.find("h2", itemprop="headline")
 
