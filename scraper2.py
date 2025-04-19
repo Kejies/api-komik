@@ -298,7 +298,7 @@ def anime_search(query):
         title = title_tag.get_text(strip=True) if title_tag else ""
 
         results.append({
-            "link": link,
+            "link": urlparse(link).path.strip("/"),
             "img": img,
             "type": typex,
             "epx": epx,
