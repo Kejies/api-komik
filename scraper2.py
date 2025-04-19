@@ -301,7 +301,7 @@ def anime_search(query):
             results.append({
                 "link": link,
                 "img": img,
-                "labels": labels,
+                "chapter": labels,
                 "desc": desc
             })
 
