@@ -371,40 +371,52 @@ def find_genre(genre, page=1):
     return data_list, total_pages
 
 kiryu = "https://kiryuu01.com/"
-def search_manga_manhua(query):
-    search_url = f"{kiryu}?s={query.replace(' ', '+')}"
-    response = requests.get(search_url, headers=headers)
-    soup = BeautifulSoup(response.text, "html.parser")
-    komik_container = soup.find("div", class_="listupd")
-    komik_list = komik_container.find_all("div", class_="bs")
+def search_manga_manhua(query, max_pages=50):
+    all_results = []
+    page = 1
 
-    data_list = []
-    for komik in komik_list:
-        tipe = komik.find("span", class_="type")["class"][1]
-        if tipe.lower() == "manhwa":
-            continue
-        link = komik.find("a")["href"]
-        parsed_link = urlparse(link).path.strip("/").replace("manga/", "")
-        img_tag = komik.find("img", class_="ts-post-image")
-        img_url = img_tag["src"] if img_tag and "src" in img_tag.attrs else "null"
-        title_tag = komik.find("div", class_="tt")
-        title = title_tag.text.strip() if title_tag else "Tidak Ada Judul"
-        chapterCont = komik.find("div", class_="adds")
-        chapter = chapterCont.find("div", class_="epxs").text.strip()
-        warna = komik.find("span", class_="colored").text.strip() if komik.find("span", class_="colored") else ""
-        ratting = komik.find("div", class_="numscore").text
+    while page <= max_pages:
+        search_url = f"{kiryu}/page/{page}/?s={query.replace(' ', '+')}"
+        response = requests.get(search_url, headers=headers)
+        soup = BeautifulSoup(response.text, "html.parser")
 
+        komik_container = soup.find("div", class_="listupd")
+        if not komik_container:
+            break
 
-        data_list.append({
-            "link": parsed_link,
-            "title": title,
-            "ratting": ratting,
-            "colored": warna,
-            "type": tipe,
-            "chapter": chapter,
-            "img": img_url
-        })
-    return data_list
+        komik_list = komik_container.find_all("div", class_="bs")
+        if not komik_list:
+            break  # Tidak ada hasil di halaman ini, stop
+
+        for komik in komik_list:
+            tipe = komik.find("span", class_="type")["class"][1]
+            if tipe.lower() == "manhwa":
+                continue  # skip manhwa
+
+            link = komik.find("a")["href"]
+            parsed_link = urlparse(link).path.strip("/").replace("manga/", "")
+            img_tag = komik.find("img", class_="ts-post-image")
+            img_url = img_tag["src"] if img_tag and "src" in img_tag.attrs else "null"
+            title_tag = komik.find("div", class_="tt")
+            title = title_tag.text.strip() if title_tag else "Tidak Ada Judul"
+            chapterCont = komik.find("div", class_="adds")
+            chapter = chapterCont.find("div", class_="epxs").text.strip()
+            warna = komik.find("span", class_="colored").text.strip() if komik.find("span", class_="colored") else ""
+            ratting = komik.find("div", class_="numscore").text if komik.find("div", class_="numscore") else ""
+
+            all_results.append({
+                "link": parsed_link,
+                "title": title,
+                "ratting": ratting,
+                "colored": warna,
+                "type": tipe,
+                "chapter": chapter,
+                "img": img_url
+            })
+
+        page += 1
+
+    return all_results
 
 
 def get_manhua_list(page=1):
