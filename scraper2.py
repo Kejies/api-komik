@@ -199,9 +199,9 @@ def anime_content(link):
     return {
         'title': title,
         'video_url': source,
-        'episode_prev': prevBTN,
-        'episode_next': nextBTN,
-        'eps_list': daftarEPS
+        'episode_prev': urlparse(prevBTN).path.strip(),
+        'episode_next': urlparse(nextBTN).path.strip(),
+        'eps_list': urlparse(daftarEPS).path.replace("/anime", "")
     }
 
 
