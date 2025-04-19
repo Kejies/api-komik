@@ -277,3 +277,32 @@ def anime_content(link):
         'eps_list': eps_list
     }
 
+def anime_search(query):
+    base_url = f"{BASE_URL}/search/{query}/"
+    res = requests.get(base_url, headers=headers)
+    soup = BeautifulSoup(res.content, "html.parser")
+    main = soup.find("div", class_="menu")
+    
+    results = []
+
+    if main:
+        tables = main.find_all("table", class_="otable")
+        for table in tables:
+            link_tag = table.find("a", href=True)
+            img_tag = table.find("img", src=True)
+            label_tags = table.find_all("span", class_="label")
+            desc_tag = table.find("p", class_="des")
+
+            link = link_tag["href"] if link_tag else ""
+            img = img_tag["src"] if img_tag else ""
+            labels = [label.get_text(strip=True) for label in label_tags]
+            desc = desc_tag.get_text(strip=True) if desc_tag else ""
+
+            results.append({
+                "link": link,
+                "img": img,
+                "labels": labels,
+                "desc": desc
+            })
+
+    return results
