@@ -2,6 +2,7 @@ import requests
 import re
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
+import unicodedata
 
 BASE_URL = "https://manhwalist.xyz/"
 headers = {
@@ -472,30 +473,49 @@ def get_manga_list(page=1):
 
 
     return data_list, total_pages
+
+def normalize(text):
+    return unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode().lower()
+
 def search_manga_manhua_by_title(keyword, page=1):
     results = []
-    
+
+    # Ambil list manga & manhua dari halaman tertentu
     manhua_list, _ = get_manhua_list(page)
     manga_list, _ = get_manga_list(page)
 
-    data_list = manhua_list + manga_list  # Gabungkan
+    # Gabungkan
+    data_list = manhua_list + manga_list
 
-    keyword_lower = keyword.lower()
+    keyword_norm = normalize(keyword)
     for data in data_list:
-        if keyword_lower in data['title'].lower():
+        title_norm = normalize(data['title'])
+
+        # Cocokkan judul yang telah dinormalisasi
+        if keyword_norm in title_norm:
             results.append(data)
+
+    # Urutkan hasil berdasarkan exact match
+    results.sort(key=lambda x: 0 if normalize(x['title']) == keyword_norm else 1)
 
     return results
 
 def get_search_manhua_manga(keyword, max_pages=100):
     all_results = []
+    seen_titles = set()  # Untuk menghindari duplikat
+
     for page in range(1, max_pages + 1):
+        print(f"[INFO] Checking page {page}")
         results = search_manga_manhua_by_title(keyword, page)
-        if not results:  # Optional: stop kalau hasilnya kosong
-            break
-        all_results.extend(results)
+
+        for result in results:
+            if result['title'] not in seen_titles:
+                all_results.append(result)
+                seen_titles.add(result['title'])
+
+    print(f"[INFO] Total found: {len(all_results)}")
     return all_results
-get_search_manhua_manga('i really')
+
 def get_manga_manhua_detail(link):
     base_url = f"{kiryu}manga/{link}"
     res = requests.get(base_url, headers=headers)
