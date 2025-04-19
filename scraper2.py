@@ -183,13 +183,13 @@ def anime_detail(link):
         if first_episode:
             episodeFL['first_episode'] = {
                 "title": first_episode.find("span", class_="epcurfirst").text.strip() if first_episode.find("span", class_="epcurfirst") else "",
-                "link": urlparse(first_episode["href"]).path.strip("/")
+                "link": episode[-1]['link']  
             }
         
         if last_episode:
             episodeFL['last_episode'] = {
                 "title": last_episode.find("span", class_="epcurlast").text.strip() if last_episode.find("span", class_="epcurlast") else "",
-                "link": urlparse(last_episode["href"]).path.strip("/")
+                "link": episode[0]['link']  
             }
 
     related = []
@@ -227,7 +227,7 @@ def anime_detail(link):
         "episodeList": episode,
         "relatedAnime": related
     }
-anime_detail("wind-breaker-season-2")
+
 def anime_content(link):
     base_url = f"{BASE_URL}/{link}/"
     res = requests.get(base_url, headers=headers)
