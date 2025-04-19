@@ -155,7 +155,7 @@ def anime_detail(link):
     if sinopsis_container:
         sinopsis = sinopsis_container.get_text(separator="\n", strip=True)
         # Hapus kalimat promosi yang cocok dengan pola
-        sinopsis = re.sub(r'Temukan Anime .*? di Tensei\.id', '', sinopsis).strip()
+        sinopsis = re.sub(r'Temukan Anime .*? di Tensei\.id', '', sinopsis).replace("|", "").strip()
     else:
         sinopsis = ""
 
