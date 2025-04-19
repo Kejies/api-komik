@@ -370,15 +370,15 @@ def bandingkan_search(query):
 
 def anime_search_fix(query):
     hasil_final = bandingkan_search(query)
-    
-    data = []
-    for h in hasil_final:
-        data.append({
+
+    return [
+        {
             "link": h["link"],
             "img": h["img"],
             "type": h["type"],
             "epx": h["epx"],
             "title": h["title"]
-        })
+        }
+        for h in hasil_final
+    ]
 
-    return data
