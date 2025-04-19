@@ -281,28 +281,28 @@ def anime_search(query):
     base_url = f"{BASE_URL}/search/{query}/"
     res = requests.get(base_url, headers=headers)
     soup = BeautifulSoup(res.content, "html.parser")
-    main = soup.find("div", class_="menu")
-    
+    articles = soup.find_all("article", class_="bs")
     results = []
 
-    if main:
-        tables = main.find_all("table", class_="otable")
-        for table in tables:
-            link_tag = table.find("a", href=True)
-            img_tag = table.find("img", src=True)
-            label_tags = table.find_all("span", class_="label")
-            desc_tag = table.find("p", class_="des")
+    for article in articles:
+        link_tag = article.find("a", href=True)
+        img_tag = article.find("img", src=True)
+        type_tag = article.find("div", class_="typex")
+        epx_tag = article.find("span", class_="epx")
+        title_tag = article.find("h2", itemprop="headline")
 
-            link = link_tag["href"] if link_tag else ""
-            img = img_tag["src"] if img_tag else ""
-            labels = [label.get_text(strip=True) for label in label_tags]
-            desc = desc_tag.get_text(strip=True) if desc_tag else ""
+        link = link_tag["href"] if link_tag else ""
+        img = img_tag["src"] if img_tag else ""
+        typex = type_tag.get_text(strip=True) if type_tag else ""
+        epx = epx_tag.get_text(strip=True) if epx_tag else ""
+        title = title_tag.get_text(strip=True) if title_tag else ""
 
-            results.append({
-                "link": link,
-                "img": img,
-                "chapter": labels,
-                "desc": desc
-            })
+        results.append({
+            "link": link,
+            "img": img,
+            "type": typex,
+            "epx": epx,
+            "title": title
+        })
 
     return results
