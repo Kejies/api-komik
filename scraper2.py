@@ -151,7 +151,13 @@ def anime_detail(link):
     # Title + Sinopsis
     title_sinopsis = main.find("div", class_="releases").text.strip() if main.find("div", class_="releases") else ""
     sinopsis_container = main.find("div", class_="entry-content")
-    sinopsis = sinopsis_container.get_text(separator="\n", strip=True) if sinopsis_container else ""
+
+    if sinopsis_container:
+        paragraphs = sinopsis_container.find_all("p")[:-1]
+        sinopsis = "\n".join(p.get_text(strip=True) for p in paragraphs)
+    else:
+        sinopsis = ""
+
 
     episode = []
     eplist_container = main.find("div", class_="eplister")
