@@ -278,7 +278,7 @@ def anime_content(link):
     }
 
 def anime_search(query):
-    base_url = f"{BASE_URL}/search/{query}/"
+    base_url = f"{base_url2}?s={query}"
     res = requests.get(base_url, headers=headers)
     soup = BeautifulSoup(res.content, "html.parser")
     articles = soup.find_all("article", class_="bs")
