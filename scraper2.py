@@ -92,21 +92,16 @@ def convert_to_ordinal_slug(slug: str) -> str:
     return f"{base}-{ordinal}-season"
 def normalize_ep_link_to_match_anime_link(link: str, ep_link: str) -> str:
     ep_path = urlparse(ep_link).path.strip("/")
-    
-    # Tangkap bagian episode-nya
     match = re.search(r"(episode-\d+)$", ep_path.lower())
     if not match:
         return None
     
     episode_part = match.group(1)
-    
-    # Normalisasi base-nya
     ep_base_slug = re.sub(r"-episode-\d+$", "", ep_path.lower())
     normalized_link = normalize_anime_url(link)
     normalized_ep = normalize_anime_url(ep_base_slug)
 
     if normalized_link == normalized_ep:
-        # Gabungkan kembali base yang sudah benar + episode part
         return f"{normalized_link}/{episode_part}"
     
     return None
@@ -178,8 +173,6 @@ def anime_detail(link):
                         "link": matched_slug,
                         "epsupdate": ep_update
                     })
-                    print(ep_link)
-                    print(matched_slug)
 
     episodeFL = {}
     lastend_container = main.find("div", class_="lastend")
