@@ -328,7 +328,7 @@ def anime_search(query):
         title = title_tag.get_text(strip=True) if title_tag else ""
 
         results.append({
-            "link": urlparse(link).path.strip("/"),
+            "link": urlparse(link).path.strip("/anime"),
             "img": img,
             "type": typex,
             "epx": epx,
@@ -370,7 +370,7 @@ def anime_search_fix(query):
 
     return [
         {
-            "link": h["link"].removeprefix("/anime"),
+            "link": h["link"],
             "img": h["img"],
             "type": h["type"],
             "epx": h["epx"],
