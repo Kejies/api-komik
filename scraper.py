@@ -370,70 +370,8 @@ def find_genre(genre, page=1):
 
 kiryu = "https://kiryuu01.com/"
 
-def get_search_manhua(query):
-    search_url = f"https://komiklab.id/manga?sort=updated&type=manhua&search={query.replace(' ', '+')}"
-    response = requests.get(search_url, headers=headers)
-    soup = BeautifulSoup(response.text, "html.parser")
-    main = soup.find("div", class_="listupd")
-    main_post = main.find_all("div", class_="animepost")
 
-    komik_list = []
 
-    for komik in main_post:
-        link = komik.find("a")["href"]
-        parsed_link = urlparse(link).path.strip("/").replace("komik/", "")
-        img_tag = komik.find("img", itemprop="image")
-        img_url = img_tag["src"] if img_tag and "src" in img_tag.attrs else "null"
-        title_tag = komik.find("div", class_="tt").find("h4")
-        title = title_tag.text.strip() if title_tag else "Tidak Ada Judul"
-        tipe = komik.find("span", class_="typeflag")["class"][1]
-        warna = komik.find("div", class_="warnalabel").text.strip() if komik.find("div", class_="warnalabel") else ""
-
-        komik_list.append({
-            "link": parsed_link,
-            "title": title,
-            "colored": warna,
-            "type": tipe,
-            "img": img_url
-        })
-        print(komik_list)
-    return komik_list
-
-def get_search_manga(query):
-    search_url = f"https://komiklab.id/manga?sort=updated&type=manga&search={query.replace(' ', '+')}"
-    res = requests.get(search_url, headers=headers)
-    soup = BeautifulSoup(res.content, "html.parser")
-    data = []
-    items = soup.select('.product__item')
-
-    for item in items:
-        title_tag = item.select_one('h5 a')
-        type_tag = item.select_one('a[href*="type=manhua"]')
-
-        if title_tag and type_tag:
-            link = title_tag['href'].replace("/manga", "").strip()
-            type_ = type_tag.text.strip()
-            img_div = soup.select_one('.product__item__pic')
-            img_url = img_div['data-setbg'] if img_div else None
-            detail_url = f"https://komiklab.id/manga{link}"
-            resp = requests.get(detail_url, headers=headers)
-            souper = BeautifulSoup(resp.content, "html.parser")
-            title = souper.select_one('.anime__details__title h3')
-            title_text = title.text.strip() if title else None
-            # Last Chapter
-            last_chapter = souper.select_one('#chapterList .chapter-item')
-            chapter = last_chapter.text.replace("Ch", "Chapter").strip() if last_chapter else None
-
-            data.append({
-                "link": link,
-                "title": title_text,
-                "colored": "warna",
-                "type": type_,
-                "chapter": chapter,
-                "img": img_url
-            })
-
-    return data
 
 def get_manhua_list(page=1):
     base_url = f"{kiryu}manga/?page={page}&status=&type=manhua&order="
@@ -534,7 +472,30 @@ def get_manga_list(page=1):
 
 
     return data_list, total_pages
+def search_manga_manhua_by_title(keyword, page=1):
+    results = []
+    
+    manhua_list, _ = get_manhua_list(page)
+    manga_list, _ = get_manga_list(page)
 
+    data_list = manhua_list + manga_list  # Gabungkan
+
+    keyword_lower = keyword.lower()
+    for data in data_list:
+        if keyword_lower in data['title'].lower():
+            results.append(data)
+
+    return results
+
+def get_search_manhua_manga(keyword, max_pages=100):
+    all_results = []
+    for page in range(1, max_pages + 1):
+        results = search_manga_manhua_by_title(keyword, page)
+        if not results:  # Optional: stop kalau hasilnya kosong
+            break
+        all_results.extend(results)
+    return all_results
+get_search_manhua_manga('i really')
 def get_manga_manhua_detail(link):
     base_url = f"{kiryu}manga/{link}"
     res = requests.get(base_url, headers=headers)
