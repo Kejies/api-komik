@@ -370,7 +370,7 @@ def anime_search_fix(query):
 
     return [
         {
-            "link": h["link"].replace("/anime", ""),
+            "link": h["link"].removeprefix("/anime"),
             "img": h["img"],
             "type": h["type"],
             "epx": h["epx"],
