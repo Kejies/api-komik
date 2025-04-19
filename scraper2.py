@@ -179,15 +179,22 @@ def anime_content(link):
     soup = BeautifulSoup(res.content, "html.parser")
     main = soup.find("div", class_="postbody")
     title_tag = main.find("h1", class_="entry-title")
-    title = title_tag.text.strip()
+    title = title_tag.text.strip() if title_tag else None
     container = main.find("div", class_="player-embed")
-    source_tag = container.find("iframe")
-    source = source_tag['src']
+    source_tag = container.find("iframe") if container else None
+    source = source_tag['src'] if source_tag else None
+
     pag = main.find("div", class_="naveps")
+    prevBTN = nextBTN = daftarEPS = None
+
     if pag:
-        prevBTN = pag.find("a", rel="prev")
-        daftarEPS = pag.find("div", class_="nvsc").find("a")
-        nextBTN = pag.find("a", rel="next")
+        prevBTN_tag = pag.find("a", rel="prev")
+        nextBTN_tag = pag.find("a", rel="next")
+        daftarEPS_tag = pag.find("div", class_="nvsc").find("a") if pag.find("div", class_="nvsc") else None
+
+        prevBTN = prevBTN_tag['href'] if prevBTN_tag else None
+        nextBTN = nextBTN_tag['href'] if nextBTN_tag else None
+        daftarEPS = daftarEPS_tag['href'] if daftarEPS_tag else None
 
     return {
         'title': title,
@@ -196,6 +203,7 @@ def anime_content(link):
         'episode_next': nextBTN,
         'eps_list': daftarEPS
     }
+
 
 def anime_search(query):
     base_url = f"{base_url2}?s={query}"

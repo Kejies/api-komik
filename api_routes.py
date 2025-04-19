@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, Response
 import json
-from scraper import terbaru, popular, detail, content, search_all_sources, search_manga_manhua, find_genre, get_manhua_list, get_manga_manhua_detail, get_manga_manhua_content, get_manga_list
+from scraper import terbaru, popular, detail, content, search_all_sources, find_genre, get_manhua_list, get_manga_manhua_detail, get_manga_manhua_content, get_manga_list
 from scraper2 import anime_terbaru, anime_detail, anime_content, anime_search
 api_routes = Blueprint("api_routes", __name__)
 
