@@ -341,35 +341,28 @@ def anime_search_fix(query):
     search1 = anime_search(query)
     search2 = anime_search_base(query)
 
+    # Buat peta link dari base sebagai referensi yang valid
     base_map = {
         normalize_anime_url(item["link"]): item
         for item in search2
     }
 
+    hasil = []
+
     for item in search1:
         ori_link = item["link"]
         normalized = normalize_anime_url(ori_link)
 
+        # Cek apakah match langsung
         if normalized in base_map:
             item["link"] = base_map[normalized]["link"]
-            return {
-                "link": item["link"],
-                "img": item["img"],
-                "type": item["type"],
-                "epx": item["epx"],
-                "title": item["title"]
-            }
+            hasil.append(item)
 
         else:
+            # Coba fallback slug ke ordinal
             fallback_slug = convert_to_ordinal_slug(normalized)
             if fallback_slug in base_map:
                 item["link"] = base_map[fallback_slug]["link"]
-                return {
-                    "link": item["link"],
-                    "img": item["img"],
-                    "type": item["type"],
-                    "epx": item["epx"],
-                    "title": item["title"]
-                }
+                hasil.append(item)
 
-    return None
+    return hasil
