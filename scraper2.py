@@ -153,8 +153,9 @@ def anime_detail(link):
     sinopsis_container = main.find("div", class_="entry-content")
 
     if sinopsis_container:
-        paragraphs = sinopsis_container.find_all("p")[:-1]
-        sinopsis = "\n".join(p.get_text(strip=True) for p in paragraphs)
+        sinopsis = sinopsis_container.get_text(separator="\n", strip=True)
+        # Hapus kalimat promosi yang cocok dengan pola
+        sinopsis = re.sub(r'Temukan Anime .*? di Tensei\.id', '', sinopsis).strip()
     else:
         sinopsis = ""
 
