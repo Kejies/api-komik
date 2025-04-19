@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, Response
 import json
-from scraper import terbaru, popular, detail, content, search_all_sources, find_genre, get_manhua_list, get_manga_manhua_detail, get_manga_manhua_content, get_manga_list
+from scraper import terbaru, popular, detail, content, search_all_sources, search_manga_manhua, find_genre, get_manhua_list, get_manga_manhua_detail, get_manga_manhua_content, get_manga_list
 
 api_routes = Blueprint("api_routes", __name__)
 
@@ -77,7 +77,7 @@ def api_content(link):
 
 @api_routes.route('/api/search/<path:query>', methods=['GET'])
 def api_search(query):
-    komik_data = search_all_sources(query)
+    komik_data = search_manga_manhua(query)
 
     data = {
         "success": True,
