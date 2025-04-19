@@ -131,13 +131,13 @@ def api_get_manga(page=1):
 
 @api_routes.route('/api/anime-terbaru/<int:page>', methods=['GET'])
 def api_anime_terbaru(page):
-    anime_data = anime_terbaru(page)
+    anime_data, total_pages = anime_terbaru(page)
 
     data = {
         "success": True,
         "message": "Berhasil mengambil data",
         "current_page": str(page),
-        "total_pages": str(25),
+        "total_pages": total_pages,
         "data": anime_data 
     }
     
