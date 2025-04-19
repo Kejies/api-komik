@@ -33,7 +33,7 @@ def anime_terbaru(page=1):
         title = title_tag.get_text(strip=True) if title_tag else ""
 
         data_list.append({
-            "link": link,
+            "link": urlparse(link).path.strip(),
             "img": img,
             "type": typex,
             "epx": epx,
