@@ -160,6 +160,45 @@ def api_anime_detail(link):
     
     return Response(json.dumps(data, ensure_ascii=False, indent=4), mimetype="application/json")
 
+@api_routes.route('/api/search-detail/<path:link>', methods=['GET'])
+def api_search_detail(link):
+    komik_data = None
+    anime_data = None
+
+    try:
+        komik_data = detail(link)
+    except Exception as e:
+        print(f"[ERROR] detail() gagal: {e}")
+
+    try:
+        anime_data = anime_detail(link)
+    except Exception as e:
+        print(f"[ERROR] anime_detail() gagal: {e}")
+
+    if not komik_data and not anime_data:
+        return Response(json.dumps({
+            "success": False,
+            "message": "Gagal mengambil data, tidak ditemukan di komik maupun anime",
+            "data": {}
+        }, ensure_ascii=False, indent=4), mimetype="application/json")
+
+    if komik_data and anime_data:
+        message = "Berhasil mengambil semua data"
+    elif komik_data:
+        message = "Data ditemukan di Komik"
+    else:
+        message = "Data ditemukan di Anime"
+
+    return Response(json.dumps({
+        "success": True,
+        "message": message,
+        "data": {
+            "komik": komik_data,
+            "anime": anime_data
+        }
+    }, ensure_ascii=False, indent=4), mimetype="application/json")
+
+
 @api_routes.route('/api/nontonanime/<path:link>', methods=['GET'])
 def api_nonton_anime(link):
     anime_data = anime_content(link)

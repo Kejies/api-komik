@@ -115,7 +115,7 @@ def anime_detail(link):
                 episode.append({
                     "episode": ep_num,
                     "title": ep_title,
-                    "link": ep_link,
+                    "link": urlparse(ep_link).path.strip("/"),
                     "epsupdate": ep_update
                 })
 
