@@ -161,7 +161,7 @@ def anime_detail(link):
     return {
         "title": title,
         "image": image,
-        "link": f"/komik/{link}",
+        "href": link,
         "ratting": ratting,
         "episodeFL": episodeFL,
         "genre": genre,
