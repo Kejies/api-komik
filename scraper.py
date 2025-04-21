@@ -387,12 +387,16 @@ def find_genre(genre, page=1):
     return data_list, total_pages
 
 kiryu = "https://kiryuu01.com/"
-def search_manga_manhua(query, max_pages=50):
+def search_manga_manhua(query):
     all_results = []
     page = 1
+    max_pages = 1  # default, akan diperbarui dari pagination di halaman 1
 
     while page <= max_pages:
-        search_url = f"{kiryu}?s={query.replace(' ', '+')}"
+        if page == 1:
+            search_url = f"{kiryu}/?s={query.replace(' ', '+')}"
+        else:
+            search_url = f"{kiryu}/page/{page}/?s={query.replace(' ', '+')}"
 
         try:
             response = requests.get(search_url, headers=headers)
@@ -402,6 +406,22 @@ def search_manga_manhua(query, max_pages=50):
             break
 
         soup = BeautifulSoup(response.text, "html.parser")
+
+        if page == 1:
+            # Ambil max_pages dari pagination
+            pagination = soup.find("div", class_="pagination")
+            if pagination:
+                page_links = pagination.find_all("a", class_="page-numbers")
+                numbers = []
+                for link in page_links:
+                    try:
+                        number = int(link.text.strip())
+                        numbers.append(number)
+                    except ValueError:
+                        continue
+                if numbers:
+                    max_pages = max(numbers)
+
         komik_container = soup.find("div", class_="listupd")
         if not komik_container:
             break
@@ -449,7 +469,6 @@ def search_manga_manhua(query, max_pages=50):
         page += 1
 
     return all_results
-
 
 
 def get_manhua_list(page=1):
