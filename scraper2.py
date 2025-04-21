@@ -68,7 +68,7 @@ def anime_detail(link):
 
     # Duration
     info_tags = main.find_all("span")
-    status, duration, released, studios = "", "", ""
+    status, duration, released, studios = "", "", "", ""
     for span in info_tags:
         text = span.text.lower()
         if "status" in text:
