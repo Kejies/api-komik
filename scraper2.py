@@ -68,10 +68,12 @@ def anime_detail(link):
 
     # Duration
     info_tags = main.find_all("span")
-    duration, released, studios = "", "", ""
+    status, duration, released, studios = "", "", ""
     for span in info_tags:
         text = span.text.lower()
-        if "durasi" in text:
+        if "status" in text:
+            status = span.text.split(":")[-1].strip()
+        elif "durasi" in text:
             duration = span.text.split(":")[-1].strip()
         elif "dirilis" in text:
             released = span.text.split(":")[-1].strip()
@@ -165,6 +167,7 @@ def anime_detail(link):
         "ratting": ratting,
         "episodeFL": episodeFL,
         "genre": genre,
+        "status": status,
         "duration": duration,
         "studios": studios,
         "released": released,
