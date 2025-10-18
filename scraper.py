@@ -3,7 +3,7 @@ import re
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 
-BASE_URL = "https://manhwalist01.com/"
+BASE_URL = "http://manhwalist02.site/"
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
 }
