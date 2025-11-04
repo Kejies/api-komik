@@ -387,7 +387,7 @@ def find_genre(genre, page=1):
         total_pages = current_page
     return data_list, total_pages
 
-kiryu = "https://kiryuu01.com/"
+kiryu = "https://kiryuu03.com/"
 def search_manga_manhua(query):
     all_results = []
     page = 1
